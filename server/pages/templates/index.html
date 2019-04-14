@@ -1,0 +1,86 @@
+<html>
+<head>
+<title>Chemical reactivity prediction</title>
+
+<script type="text/javascript" language="javascript" src="static/jsme/jsme.nocache.js"></script>
+
+<script language="JavaScript">
+
+function getSmiles() {
+  var drawing = document.JME.smiles();
+  document.form.src_smi.value = drawing;
+}
+
+function getMolFile() {
+  var mol = document.JME.molFile();
+  document.form.mol_output.value = mol;
+}
+
+function useMol() {
+  document.JME.readMolFile(document.form.mol_output.value);
+}
+
+function test_get() {
+	if (document.form.src_smi.value === "") {
+        getSmiles();
+    }
+}
+</script>
+
+</head>
+<body bgcolor="#FFFFFF">
+
+    <p>
+        <h2>Prediction products of chemical reactions using Transformer</h2>
+
+    <p>
+		<table border=0 width="100%">
+			<tr>
+				<td align="center">
+					<table>
+						<tr>
+							<td>
+								<div code="JME.class" name="JME" archive="JME.jar" width=360
+									height=315>You have to enable Java and JavaScritpt on
+									your machine !</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td align="center">
+					<form method="POST" name="form" onsubmit="test_get();">
+						<p>
+                            <b>Source smiles</b>
+                                <br>
+                                    <input type="text" name="src_smi" value="{{source_smiles}}" size=48">
+                                <br>
+                        <p>
+                            <b>Target smiles</b>
+                                <br>
+                                    <input type="text" NAME="tgt_smi" value="{{target_smiles}}" size=48">
+                                <br>
+                            <b>Canonical reaction</b>
+                                <br>
+                                    <input type="text" NAME="reaction" value="{{reaction}}" size=48">
+                                <br>
+                        <p>
+                            <b>Product mol file</b>
+                                <br>
+								    <textarea name="mol_output" rows=5 cols=40>{{mol_file}}</textarea>
+                                <br>
+                        <p>
+                            <input type="button" value="Get SMILES" onClick="getSmiles()">
+                            <input type="button" value="Get mol file" onClick="getMolFile()">
+                        <p>
+                            <input type="button" value="Use mol file" 	onClick="useMol()">
+                        <p>
+                            <input type="button" value="Clear Editor"	onClick="document.JME.reset()">
+                            <input	type="reset" VALUE="Clear Fields">
+                            <input type="submit" value="Predict products">
+                        </p>
+					</form>
+				</td>
+			</tr>
+		</table>
+</body>
+</html>

@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from rdkit import Chem
 
 from reaction_predictors.t2t_models.t2t_utils import get_predictions
+from utils.smiles_utils import get_reaction, parse_smile
 
 
 data_dir = '/home/phillnik/Science/t2t/aug_data2x'
@@ -15,28 +16,43 @@ hparams_set = "transformer_base"
 ckpt_path = tf.train.latest_checkpoint('/data/phillnik/out_aug')
 problem_name = "aug_smiles"
 predict_target = get_predictions(problem_name, data_dir, ckpt_path, hparams_set, model_name)
-regexp = "(\[[^\]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\|=|#|-|\+|\\\\\/|:|~|@|\?|>|\*|\$|\%[0-9]{2}|[0-9])"
+
 
 def home(request):
-    return render(request, 'index.html', {'what': 'DWT File Upload with Django'})
+    context = {
+        'source_smiles': "",
+        'target_smiles': "",
+        'reaction': "",
+        'mol_file': ""
+    }
+    return render(request, 'index.html', context)
 
 
 class HomePageView(TemplateView):
     def get(self, request, **kwargs):
-        return render(request, 'index.html', context=None)
+        context = {
+            'source_smiles': "",
+            'target_smiles': "",
+            'reaction': "",
+            'mol_file': ""
+        }
+        return render(request, 'index.html', context)
 
     def post(self, request, **kwargs):
         target_smiles = None
-        if 'smi' in request.POST:
+        if 'src_smi' in request.POST:
             # import pdb
             # pdb.set_trace()
-            source_smiles = ' '.join(re.findall(regexp, request.POST["smi"]))
-            print('source smiles: {}'.format(source_smiles))
-            target_smiles = predict_target(source_smiles).replace(' ', '')
+            source_smiles = parse_smile(request.POST["src_smi"])
+            target_smiles = predict_target(source_smiles)
+            print('Source smiles: {}'.format(source_smiles))
+            print('Target smiles: {}'.format(target_smiles))
             mol = Chem.MolToMolBlock(Chem.MolFromSmiles(target_smiles))
-            print("mol {}".format(mol))
+            reaction = get_reaction(source_smiles, target_smiles)
             context = {
-                'smiles': target_smiles,
+                'source_smiles': request.POST["src_smi"],
+                'target_smiles': target_smiles.replace(" ", ""),
+                'reaction': reaction,
                 'mol_file': '\n' + mol
             }
             return render(request, 'index.html', context)

@@ -7,10 +7,13 @@ class Dataset:
     def __init__(self, smarts_list, max_num_atoms=100, min_num_atoms=10):
         self.dataset = []
         for smarts in smarts_list:
-            rxn = Reaction(smarts)
-            num_atoms = rxn.reactants.get_num_atoms()
-            if (num_atoms < max_num_atoms) and (num_atoms > min_num_atoms):
-                self.dataset.append(rxn)
+            try:
+                rxn = Reaction(smarts)
+                num_atoms = rxn.reactants.get_num_atoms()
+                if (num_atoms < max_num_atoms) and (num_atoms > min_num_atoms):
+                    self.dataset.append(rxn)
+            except Exception:
+                print(smarts)
         self.products_node_types = self.calculate_unique_values('product', 'get_node_types')
         self.products_bond_types = self.calculate_unique_values('product', 'get_adjacency_matrix')
         self.reactants_node_types = self.calculate_unique_values('reactants', 'get_node_types')
@@ -21,8 +24,8 @@ class Dataset:
         values = None
         for rxn in self.dataset:
             value = np.unique(getattr(getattr(rxn, reaction_part), field)())
-            if values:
-                values = np.unique(np.c_[values, value])
+            if values is not None:
+                values = np.unique(np.r_[values, value])
             else:
                 values = value
         return values

@@ -12,8 +12,8 @@ class RGCNNClassifier(nn.Module):
                  batch_size,
                  h_dim,
                  num_rels,
-                 num_conv_layers=8,
-                 num_fcn_layers=2):
+                 num_conv_layers,
+                 num_fcn_layers):
         super(RGCNNClassifier, self).__init__()
         self.n_nodes = n_nodes
         self.h_dim = h_dim
@@ -44,7 +44,7 @@ class RGCNNTrClassifier(nn.Module):
         self.batch_size = batch_size
         self.rgcn = RGCNModel(in_feat, h_dim, num_rels, num_conv_layers, bias=None)
         self.trans = TransModel(h_dim, num_attention_heads, num_trans_layers)
-        self.fcn = FCNModel(h_dim)
+        self.fcn = FCNModel(h_dim, num_layers=num_fcn_layers)
 
     def forward(self, g):
         h = self.rgcn(g).view((self.batch_size, self.n_nodes, self.h_dim)).permute(1, 0, 2)

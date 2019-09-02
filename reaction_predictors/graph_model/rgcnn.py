@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import dgl.function as fn
 
 
@@ -65,4 +66,3 @@ class RGCNModel(nn.Module):
         for layer in self.layers:
             layer(g)
         return g.ndata['h']
-

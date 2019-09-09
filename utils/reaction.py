@@ -12,7 +12,7 @@ class Reaction:
         self.product = Molecule(product)
 
     def get_product_mask(self):
-        return np.int32(self.product.get_atoms_mapping() > 0)
+        return np.int32(self.reactants.get_atoms_mapping() > 0)
 
     def get_reactants_adjacency_matrix(self):
         return self.reactants.get_adjacency_matrix()

@@ -33,7 +33,7 @@ class Molecule:
         b_types = [str(b.GetBondType()) for b in self.rdkit_molecule.GetBonds()]
         return (np.array(senders, dtype=np.int32),
                 np.array(receivers, dtype=np.int32),
-                np.array(b_types, dtype=str))
+                np.array(b_types, dtype='<U10'))
 
     def get_node_types(self):
         return np.array([atom.GetAtomicNum() for atom in self.rdkit_molecule.GetAtoms()], dtype=np.int32)
@@ -44,7 +44,7 @@ class Molecule:
     def get_adjacency_matrix(self):
         senders, receivers, b_types = self.get_senders_recievers_types()
         num_atoms = self.get_num_atoms()
-        adjacency_matrix = np.zeros((num_atoms, num_atoms), dtype=str)
+        adjacency_matrix = np.zeros((num_atoms, num_atoms), dtype='<U10')
         adjacency_matrix[senders, receivers] = b_types
         adjacency_matrix[receivers, senders] = b_types
         return adjacency_matrix
@@ -76,13 +76,17 @@ class Molecule:
         map_num = [atom.GetAtomMapNum() for atom in self.rdkit_molecule.GetAtoms()]
         return np.array(map_num, dtype=np.int32)
 
+    def get_degrees(self):
+        return np.count_nonzero(self.get_adjacency_matrix(), -1)
+
 
 if __name__ == "__main__":
     smarts = '[Br:1][CH2:2][CH2:3][CH2:4][OH:5].[CH3:6][S:7](Cl)(=[O:9])=[O:8].CCOCC.C(N(CC)CC)C'
     mol = Molecule(smarts)
     mol.get_senders_recievers_types()
-    print(mol.get_adjacency_matrix())
+    mol.get_adjacency_matrix()
     mol.get_smiles()
     mol.get_node_types()
     mol.get_node_features()
+    mol.get_degrees()
 

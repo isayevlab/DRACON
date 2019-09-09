@@ -1,6 +1,7 @@
 from torch import nn
 from torch.nn import MultiheadAttention, Linear, Dropout
 from torch.nn.modules.transformer import LayerNorm
+from torch.nn import functional as F
 
 
 class TransLayer(nn.Module):

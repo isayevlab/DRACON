@@ -12,8 +12,8 @@ class RGCNNClassifier(nn.Module):
                  batch_size,
                  h_dim,
                  num_rels,
-                 num_conv_layers,
-                 num_fcn_layers):
+                 num_conv_layers=4,
+                 num_fcn_layers=2):
         super(RGCNNClassifier, self).__init__()
         self.n_nodes = n_nodes
         self.h_dim = h_dim

@@ -31,17 +31,11 @@ class RGCNLayer(nn.Module):
     def forward(self, g):
 
         weight = self.weight
-        if self.is_input_layer:
-            def message_func(edges):
-                embed = weight.view(-1, self.out_feat)
-                index = edges.data['rel_type'] * self.in_feat + edges.src['id']
-                return {'msg': embed[index]}# * edges.data['norm']}
-        else:
-            def message_func(edges):
-                w = weight[edges.data['rel_type']]
-                msg = torch.bmm(edges.src['h'].unsqueeze(1), w).squeeze()
-                #msg = msg * edges.data['norm']
-                return {'msg': msg}
+
+        def message_func(edges):
+            w = weight[edges.data['rel_type']]
+            msg = torch.bmm(edges.src['h'].unsqueeze(1), w).squeeze()
+            return {'msg': msg}
 
         def apply_func(nodes):
             h = nodes.data['h']
@@ -55,9 +49,9 @@ class RGCNLayer(nn.Module):
 
 
 class RGCNModel(nn.Module):
-    def __init__(self, in_feat, h_dim, num_rels, num_layers, bias=None):
+    def __init__(self, h_dim, num_rels, num_layers, bias=None):
         super(RGCNModel, self).__init__()
-        layers = [RGCNLayer(in_feat, h_dim, num_rels, activation=F.relu, is_input_layer=True, bias=bias)]
+        layers = []
         for _ in range(num_layers):
             layers.append(RGCNLayer(h_dim, h_dim, num_rels, activation=F.relu, bias=bias))
         self.layers = nn.ModuleList(layers)

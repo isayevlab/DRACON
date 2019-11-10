@@ -118,7 +118,8 @@ def get_graph(dataset,
               self_bond=True,
               pad_length=120,
               device='cuda',
-              target_type='main_product'
+              target_type='main_product',
+              features=False
               ):
     rxn = dataset.dataset[idx]
     nodes, sender, reciever, bonds, norm = load_graph_data(rxn.reactants, bond2label, node2label)
@@ -175,6 +176,12 @@ def get_graph(dataset,
     g = dgl.DGLGraph()
     g.add_nodes(len(nodes))
     g.ndata['id'] = torch.from_numpy(np.array(nodes)).to(device)
+    if features:
+        features = rxn.reactants.get_node_features()
+        pad_features = np.pad(features, ((0, 0), (0,len(nodes) - features.shape[1])))
+        g.ndata['feats'] = torch.from_numpy(np.r_[np.array([nodes]), pad_features].T).to(device)
+    else:
+        g.ndata['feats'] = torch.from_numpy(np.array([nodes]).T).to(device)
     g.add_edges(np.array(sender), np.array(reciever))
     g.edata['norm'] = torch.from_numpy(np.array(norm).reshape(-1, 1)).to(device).float()
     g.edata['rel_type'] = torch.from_numpy(np.array(bonds)).to(device)

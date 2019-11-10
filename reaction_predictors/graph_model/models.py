@@ -3,25 +3,29 @@ from torch import nn
 from reaction_predictors.graph_model.fcnn import FCNModel
 from reaction_predictors.graph_model.rgcnn import RGCNModel
 from reaction_predictors.graph_model.transformer import TransModel
+from reaction_predictors.graph_model.emdedding import Embedding
 
 
 class RGCNNClassifier(nn.Module):
     def __init__(self,
-                 in_feat,
+                 feat_sizes,
                  n_nodes,
                  batch_size,
-                 h_dim,
+                 h_dims,
                  num_rels,
                  num_conv_layers=4,
                  num_fcn_layers=2):
         super(RGCNNClassifier, self).__init__()
         self.n_nodes = n_nodes
-        self.h_dim = h_dim
+        self.h_dim = sum(h_dims)
         self.batch_size = batch_size
-        self.rgcn = RGCNModel(in_feat, h_dim, num_rels, num_conv_layers, bias=None)
-        self.fcn = FCNModel(h_dim, num_layers=num_fcn_layers)
+        self.embed = Embedding(feat_sizes, h_dims)
+        self.rgcn = RGCNModel(self.h_dim, num_rels, num_conv_layers, bias=None)
+        self.fcn = FCNModel(self.h_dim, num_layers=num_fcn_layers)
 
     def forward(self, g):
+        h = self.embed(g.ndata['feats'].T)
+        g.ndata['h'] = h
         h = self.rgcn(g).view((self.batch_size, self.n_nodes, self.h_dim))
         out = self.fcn(h)
         return out
@@ -29,10 +33,10 @@ class RGCNNClassifier(nn.Module):
 
 class RGCNNTrClassifier(nn.Module):
     def __init__(self,
-                 in_feat,
+                 feat_sizes,
                  n_nodes,
                  batch_size,
-                 h_dim,
+                 h_dims,
                  num_rels,
                  num_conv_layers=6,
                  num_trans_layers=1,
@@ -40,13 +44,16 @@ class RGCNNTrClassifier(nn.Module):
                  num_attention_heads=1):
         super(RGCNNTrClassifier, self).__init__()
         self.n_nodes = n_nodes
-        self.h_dim = h_dim
+        self.h_dim = sum(h_dims)
         self.batch_size = batch_size
-        self.rgcn = RGCNModel(in_feat, h_dim, num_rels, num_conv_layers, bias=None)
-        self.trans = TransModel(h_dim, num_attention_heads, num_trans_layers)
-        self.fcn = FCNModel(h_dim, num_layers=num_fcn_layers)
+        self.embed = Embedding(feat_sizes, h_dims)
+        self.rgcn = RGCNModel(self.h_dim, num_rels, num_conv_layers, bias=None)
+        self.trans = TransModel(self.h_dim, num_attention_heads, num_trans_layers)
+        self.fcn = FCNModel(self.h_dim, num_layers=num_fcn_layers)
 
     def forward(self, g):
+        h = self.embed(g.ndata['feats'].T)
+        g.ndata['h'] = h
         h = self.rgcn(g).view((self.batch_size, self.n_nodes, self.h_dim)).permute(1, 0, 2)
         h = self.trans(h).permute(1, 0, 2)
         out = self.fcn(h)

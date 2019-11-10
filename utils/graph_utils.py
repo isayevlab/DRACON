@@ -29,12 +29,12 @@ def label2onehot(labels, dim, encoder=None):
     return np.eye(dim, dtype=np.int32)[labels]
 
 
-def load_graph_data(rxn, bond2label, node2label):
-    sender, reciever, types = rxn.reactants.get_senders_recievers_types()
+def load_graph_data(molecules, bond2label, node2label):
+    sender, reciever, types = molecules.get_senders_recievers_types()
     encoded_types = [bond2label[t] for t in types]
-    nodes = rxn.reactants.get_node_types()
+    nodes = molecules.get_node_types()
     encoded_nodes = [node2label[node] for node in nodes]
-    norm = get_norm(sender, reciever, encoded_types, rxn.reactants.get_num_atoms(), len(bond2label))
+    norm = get_norm(sender, reciever, encoded_types, molecules.get_num_atoms(), len(bond2label))
     sender = np.r_[sender, reciever]
     reciever = np.r_[reciever, sender[:len(reciever)]]
     encoded_types = encoded_types + encoded_types
@@ -76,6 +76,39 @@ def get_nodes(datasets, n_molecule_level=1, n_reaction_level=1):
     return node2label
 
 
+def get_center_target(rxn, node2label, bond2label):
+    _, r_sender, r_reciever, r_bonds, _ = load_graph_data(rxn.reactants, bond2label, node2label)
+    _, p_sender, p_reciever, p_bonds, _ = load_graph_data(rxn.product, bond2label, node2label)
+
+    r_mask = rxn.reactants.get_atoms_mapping()
+    p_mask = rxn.product.get_atoms_mapping()
+    p_ids = np.where(r_mask > 0.)[0].flatten()
+    num2id = dict(zip(r_mask, range(len(r_mask))))
+
+    p_sender = [num2id[p_mask[i]] for i in p_sender]
+    p_reciever = [num2id[p_mask[i]] for i in p_reciever]
+
+    reagents = set(zip(r_sender, r_reciever, r_bonds)) |\
+               set(zip(r_reciever, r_sender, r_bonds))
+
+    product = set(zip(p_sender, p_reciever, p_bonds)) |\
+              set(zip(p_reciever, p_sender, p_bonds))
+    new_reagents = set()
+    for r in reagents:
+        if (r[0] in p_ids) or (r[1] in p_ids):
+            new_reagents.add(r)
+
+    reagents = new_reagents
+    interception = (reagents | product) - (reagents & product)
+
+    s, r, b = zip(*interception)
+    centers = list(set(p_ids) & set(s))
+    target = np.ones_like(r_mask)*-1
+    target[p_ids] = 0
+    target[centers] = 1
+    return target
+
+
 def get_graph(dataset,
               idx,
               bond2label,
@@ -84,10 +117,12 @@ def get_graph(dataset,
               n_reaction_level=1,
               self_bond=True,
               pad_length=120,
-              device='cuda'
+              device='cuda',
+              target_type='main_product'
               ):
     rxn = dataset.dataset[idx]
-    nodes, sender, reciever, bonds, norm = load_graph_data(rxn, bond2label, node2label)
+    nodes, sender, reciever, bonds, norm = load_graph_data(rxn.reactants, bond2label, node2label)
+
     n_atoms = len(nodes)
     molecules_lengths = get_molecule_lengths(rxn.reactants.get_smarts())
     n_molecules = len(molecules_lengths) - 1
@@ -143,6 +178,12 @@ def get_graph(dataset,
     g.add_edges(np.array(sender), np.array(reciever))
     g.edata['norm'] = torch.from_numpy(np.array(norm).reshape(-1, 1)).to(device).float()
     g.edata['rel_type'] = torch.from_numpy(np.array(bonds)).to(device)
-    target = list(dataset.dataset[idx].get_product_mask())
-    target = target + [-1] * (len(nodes) - len(target))
+    if target_type == "main_product":
+        target = list(dataset.dataset[idx].get_product_mask())
+        target = target + [-1] * (len(nodes) - len(target))
+    elif target_type == "center":
+        _, product_sender, product_reciever, product_bonds, _ = load_graph_data(rxn.product, bond2label, node2label)
+
+        target = get_center_target(rxn, node2label, bond2label)
+        target = list(target) + [-1] * (len(nodes) - len(target))
     return g, target

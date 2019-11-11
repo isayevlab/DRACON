@@ -29,7 +29,7 @@ class RGCNNTrClassifier(nn.Module):
         else:
             self.trans = None
         self.fcns = nn.ModuleList([])
-        for _ in n_model_heads:
+        for _ in range(n_model_heads):
             self.fcns.append(FCNModel(self.h_dim, num_layers=num_fcn_layers))
 
     def forward(self, g):

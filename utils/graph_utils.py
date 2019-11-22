@@ -2,52 +2,9 @@ import dgl
 import torch
 import numpy as np
 
-from rdkit import Chem
 
-
-def get_molecule_lengths(smarts):
-    lengths = []
-    for mol_smarts in smarts.split('.'):
-        mol = Chem.MolFromSmarts(mol_smarts)
-        lengths.append(mol.GetNumAtoms())
-    return np.cumsum([0] + lengths)
-
-
-def get_norm(sender, reciever, encoded_types, num_atoms, num_bonds):
-    adj_norm = np.zeros((num_atoms, num_bonds), dtype=np.float32)
-    for rec, b_type in zip(reciever, encoded_types):
-        adj_norm[rec, b_type] += 1
-    for rec, b_type in zip(sender, encoded_types):
-        adj_norm[rec, b_type] += 1
-    adj_norm[adj_norm != 0] = 1./adj_norm[adj_norm != 0]
-    return adj_norm
-
-
-def label2onehot(labels, dim, encoder=None):
-    if encoder is not None:
-        labels = [encoder(label) for label in labels]
-    return np.eye(dim, dtype=np.int32)[labels]
-
-
-def load_graph_data(molecules, bond2label, node2label):
-    sender, reciever, types = molecules.get_senders_recievers_types()
-    encoded_types = [bond2label[t] for t in types]
-    nodes = molecules.get_node_types()
-    encoded_nodes = [node2label[node] for node in nodes]
-    norm = get_norm(sender, reciever, encoded_types, molecules.get_num_atoms(), len(bond2label))
-    sender = np.r_[sender, reciever]
-    reciever = np.r_[reciever, sender[:len(reciever)]]
-    encoded_types = encoded_types + encoded_types
-    idxs = np.c_[[reciever, encoded_types]]
-    norm = norm[idxs[0], idxs[1]]
-    return encoded_nodes, list(sender), list(reciever), encoded_types, list(norm)
-
-
-def get_bonds(datasets, n_molecule_level=1, n_reaction_level=1,  self_bond=True):
-    bond_types = []
-    for dataset in datasets:
-        bond_types.extend(list(dataset.reactants_bond_types))
-    bond_types = list(set(bond_types))
+def get_bonds(bond_types, n_molecule_level=1, n_reaction_level=1, self_bond=True):
+    bond_types = list(bond_types)
     bond2label = dict(zip(bond_types, range(len(bond_types))))
     if self_bond:
         bond2label['SELF'] = len(bond2label)
@@ -59,11 +16,8 @@ def get_bonds(datasets, n_molecule_level=1, n_reaction_level=1,  self_bond=True)
     return bond2label
 
 
-def get_nodes(datasets, n_molecule_level=1, n_reaction_level=1):
-    node_types = []
-    for dataset in datasets:
-        node_types.extend(list(dataset.reactants_node_types))
-    node_types = list(set(node_types))
+def get_nodes(node_types, n_molecule_level=1, n_reaction_level=1):
+    node_types = list(node_types)
     node2label = dict(zip(node_types, range(len(node_types))))
     node2label['EMPTY'] = len(node2label)
 
@@ -76,41 +30,7 @@ def get_nodes(datasets, n_molecule_level=1, n_reaction_level=1):
     return node2label
 
 
-def get_center_target(rxn, node2label, bond2label):
-    _, r_sender, r_reciever, r_bonds, _ = load_graph_data(rxn.reactants, bond2label, node2label)
-    _, p_sender, p_reciever, p_bonds, _ = load_graph_data(rxn.product, bond2label, node2label)
-
-    r_mask = rxn.reactants.get_atoms_mapping()
-    p_mask = rxn.product.get_atoms_mapping()
-    p_ids = np.where(r_mask > 0.)[0].flatten()
-    num2id = dict(zip(r_mask, range(len(r_mask))))
-
-    p_sender = [num2id[p_mask[i]] for i in p_sender]
-    p_reciever = [num2id[p_mask[i]] for i in p_reciever]
-
-    reagents = set(zip(r_sender, r_reciever, r_bonds)) |\
-               set(zip(r_reciever, r_sender, r_bonds))
-
-    product = set(zip(p_sender, p_reciever, p_bonds)) |\
-              set(zip(p_reciever, p_sender, p_bonds))
-    new_reagents = set()
-    for r in reagents:
-        if (r[0] in p_ids) or (r[1] in p_ids):
-            new_reagents.add(r)
-
-    reagents = new_reagents
-    interception = (reagents | product) - (reagents & product)
-
-    s, r, b = zip(*interception)
-    centers = list(set(p_ids) & set(s))
-    target = np.ones_like(r_mask)*-1
-    target[p_ids] = 0
-    target[centers] = 1
-    return target
-
-
-def get_graph(dataset,
-              idx,
+def get_graph(rxn,
               bond2label,
               node2label,
               n_molecule_level=1,
@@ -118,14 +38,20 @@ def get_graph(dataset,
               self_bond=True,
               pad_length=120,
               device='cuda',
-              target_type='main_product',
               features=False
               ):
-    rxn = dataset.dataset[idx]
-    nodes, sender, reciever, bonds, norm = load_graph_data(rxn.reactants, bond2label, node2label)
+    nodes = list(rxn['reactants']['nodes'])
+    sender, reciever, bonds = list(rxn['reactants']['sender']), list(rxn['reactants']['reciever']), list(
+        rxn['reactants']['types'])
+    sender = sender + reciever
+    reciever = reciever + sender[:len(reciever)]
+    bonds = bonds + bonds
+
+    nodes = [node2label[i] for i in nodes]
+    bonds = [bond2label[i] for i in bonds]
 
     n_atoms = len(nodes)
-    molecules_lengths = get_molecule_lengths(rxn.reactants.get_smarts())
+    molecules_lengths = rxn['reactants']['lengths']
     n_molecules = len(molecules_lengths) - 1
 
     for i in range(n_molecule_level):
@@ -138,20 +64,16 @@ def get_graph(dataset,
     mol_sender = []
     mol_reciever = []
     mol_bonds = []
-    mol_norms = []
 
     for i in range(n_molecule_level):
         for j, (st, fi) in enumerate(zip(molecules_lengths[:-1], molecules_lengths[1:])):
-            rg = list(range(st, fi))
             mol_sender.extend(list(range(st, fi)) + [n_atoms + i * n_molecules + j] * (fi - st))
             mol_reciever.extend([n_atoms + i * n_molecules + j] * (fi - st) + list(range(st, fi)))
             mol_bonds.extend([bond2label[f'ML_{i}']] * (2 * (fi - st)))
-            mol_norms.extend([1. / (fi - st)] * (fi - st) + [1.] * (fi - st))
 
     rxn_sender = []
     rxn_reciever = []
     rxn_bonds = []
-    rxn_norms = []
 
     for i in range(n_molecule_level):
         for j in range(n_reaction_level):
@@ -160,9 +82,7 @@ def get_graph(dataset,
             rxn_reciever.extend([n_atoms + n_molecule_level * n_molecules + i * n_molecule_level + j] * n_molecules +
                                 list(range(n_atoms + i * n_molecules, n_atoms + (i + 1) * n_molecules)))
             rxn_bonds.extend([bond2label[f'RL_{i, j}']] * (2 * n_molecules))
-            rxn_norms.extend([1. / n_molecules] * n_molecules + [1.] * n_molecules)
 
-    norm = norm + mol_norms + rxn_norms
     sender = sender + mol_sender + rxn_sender
     reciever = reciever + mol_reciever + rxn_reciever
     bonds = bonds + mol_bonds + rxn_bonds
@@ -170,27 +90,35 @@ def get_graph(dataset,
     if self_bond:
         sender = sender + list(range(len(nodes)))
         reciever = reciever + list(range(len(nodes)))
-        norm = norm + [1.] * len(nodes)
         bonds = bonds + [bond2label['SELF']] * len(nodes)
 
     g = dgl.DGLGraph()
     g.add_nodes(len(nodes))
-    g.ndata['id'] = torch.from_numpy(np.array(nodes)).to(device)
+
     if features:
-        features = rxn.reactants.get_node_features()
-        pad_features = np.pad(features, ((0, 0), (0,len(nodes) - features.shape[1])))
+        features = rxn['reactants']['features']
+        pad_features = np.pad(features, ((0, 0), (0, len(nodes) - features.shape[1])))
         g.ndata['feats'] = torch.from_numpy(np.r_[np.array([nodes]), pad_features].T).to(device)
     else:
         g.ndata['feats'] = torch.from_numpy(np.array([nodes]).T).to(device)
     g.add_edges(np.array(sender), np.array(reciever))
-    g.edata['norm'] = torch.from_numpy(np.array(norm).reshape(-1, 1)).to(device).float()
     g.edata['rel_type'] = torch.from_numpy(np.array(bonds)).to(device)
-    if target_type == "main_product":
-        target = list(dataset.dataset[idx].get_product_mask())
-        target = target + [-1] * (len(nodes) - len(target))
-    elif target_type == "center":
-        _, product_sender, product_reciever, product_bonds, _ = load_graph_data(rxn.product, bond2label, node2label)
+    return g
 
-        target = get_center_target(rxn, node2label, bond2label)
-        target = list(target) + [-1] * (len(nodes) - len(target))
-    return g, target
+
+if __name__ == '__main__':
+    import pickle
+    with open('../data/graphs/valid.pkl', 'rb') as f:
+        valid_dataset = pickle.load(f)
+    with open('../data/graphs/meta.pkl', 'rb') as f:
+        meta = pickle.load(f)
+    bond2label = get_bonds(meta['bond'])
+    node2label = get_nodes(meta['node'])
+    print(get_graph(valid_dataset[0], bond2label, node2label))
+    pad_length = 50
+    target_main_product = valid_dataset[0]['target_main_product']
+    target_main_product = np.pad(target_main_product, (0, pad_length - len(target_main_product)), constant_values=-1)
+    target_center = valid_dataset[0]['target_center']
+    target_center = np.pad(target_center, (0, pad_length - len(target_main_product)), constant_values=-1)
+    print(target_main_product)
+    print(target_center)

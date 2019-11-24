@@ -24,13 +24,21 @@ class RGCNNTrClassifier(nn.Module):
         self.batch_size = batch_size
         self.embed = Embedding(feat_sizes, h_dims)
         self.rgcn = RGCNModel(self.h_dim, num_rels, num_conv_layers, bias=None)
+        self.sigmoid = nn.Sigmoid()
+        self.criterion = nn.BCEWithLogitsLoss()
         if num_trans_layers > 0:
             self.trans = TransModel(self.h_dim, num_attention_heads, num_trans_layers)
         else:
             self.trans = None
         self.fcns = nn.ModuleList([])
+
         for _ in range(n_model_heads):
             self.fcns.append(FCNModel(self.h_dim, num_layers=num_fcn_layers))
+        self.n_model_heads = n_model_heads
+
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
 
     def forward(self, g):
         h = self.embed(g.ndata['feats'].T)
@@ -40,8 +48,12 @@ class RGCNNTrClassifier(nn.Module):
             h = self.trans(h.permute(1, 0, 2)).permute(1, 0, 2)
         outs = []
         for fcn in self.fcns:
-            outs.append(fcn(h))
-        if len(outs) == 1:
-            return outs[0]
-        else:
-            return tuple(outs)
+            outs.append(fcn(h)[:, :, 0])
+        return tuple(outs)
+
+    def get_loss(self, g, targets):
+        outs = self.forward(g)
+        loss = 0
+        for out, target in zip(outs, targets):
+            loss += self.criterion(out[target != -1], target[target != -1])
+        return loss

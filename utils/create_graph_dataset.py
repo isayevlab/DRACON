@@ -84,9 +84,9 @@ def get_smarts(mode='train', max_num_molecules=15):
     return list(zip(idxs, new_smarts))
 
 
-def build_dataset(unique_values, data):
+def build_dataset(data):
     dataset = {}
-    for idx, smarts in  tqdm(data):
+    for idx, smarts in tqdm(data):
         product = {}
         reactants = {}
         rxn = Reaction(smarts)
@@ -113,16 +113,6 @@ def build_dataset(unique_values, data):
         target_main_product = rxn.get_product_mask()
         target_center = get_center_target(rxn)
 
-
-        unique_values['bond'].update(list(types))
-        unique_values['node'].update(list(nodes))
-
-        for name, feat in zip(features_name, react_features):
-            unique_values['features'][name].update(list(feat))
-
-        for name, feat in zip(features_name, prod_features):
-            unique_values['features'][name].update(list(feat))
-
         dataset[idx] = {'product': product,
                         'reactants': reactants,
                         'target_main_product': target_main_product,
@@ -130,25 +120,47 @@ def build_dataset(unique_values, data):
     return dataset
 
 
+def get_meta(datasets, faeture_names):
+    meta = {'type': set(),
+            'node': set(),
+            'features': {}}
+    for name in faeture_names:
+        meta['features'][name] = set()
+    for dataset in datasets:
+        for idx in tqdm(dataset):
+            for part in ['reactants', 'product']:
+                meta['type'].update(list(dataset[idx][part]['nodes']))
+                meta['node'].update(list(dataset[idx][part]['types']))
+                for name, feature in zip(faeture_names, dataset[idx][part]['features']):
+                    meta['features'][name].update(list(feature))
+    return meta
+
+
+def prune_dataset_by_length(dataset, max_len):
+    new_dataset = {}
+    for idx in dataset:
+        if len(dataset[idx]['target_main_product']) <= max_len:
+            new_dataset[idx] = dataset[idx]
+    return new_dataset
+
+
 if __name__ == '__main__':
     train = get_smarts()
     test = get_smarts(mode='test')
     valid = get_smarts(mode='valid')
-    features_name = Molecule.get_node_features_name()
-    unique_values = {}
-    unique_values['node'] = set()
-    unique_values['bond'] = set()
-    unique_values['features'] = {}
-    for name in features_name:
-        unique_values['features'][name] = set()
-    train_dataset = build_dataset(unique_values, train)
+    feature_names = Molecule.get_node_features_name()
+
+    train_dataset = build_dataset(train)
     with open('../data/graphs/train.pkl', 'wb') as f:
         pickle.dump(train_dataset, f)
-    test_dataset = build_dataset(unique_values, test)
+
+    test_dataset = build_dataset(test)
     with open('../data/graphs/test.pkl', 'wb') as f:
         pickle.dump(test_dataset, f)
-    valid_dataset = build_dataset(unique_values, valid)
+
+    valid_dataset = build_dataset(valid)
     with open('../data/graphs/valid.pkl', 'wb') as f:
         pickle.dump(valid_dataset, f)
+
     with open('../data/graphs/meta.pkl', 'wb') as f:
-        pickle.dump(unique_values, f)
+        pickle.dump(get_meta([train_dataset, test_dataset, valid_dataset], feature_names), f)

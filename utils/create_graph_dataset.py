@@ -129,8 +129,8 @@ def get_meta(datasets, faeture_names):
     for dataset in datasets:
         for idx in tqdm(dataset):
             for part in ['reactants', 'product']:
-                meta['type'].update(list(dataset[idx][part]['nodes']))
-                meta['node'].update(list(dataset[idx][part]['types']))
+                meta['node'].update(list(dataset[idx][part]['nodes']))
+                meta['type'].update(list(dataset[idx][part]['types']))
                 for name, feature in zip(faeture_names, dataset[idx][part]['features']):
                     meta['features'][name].update(list(feature))
     return meta

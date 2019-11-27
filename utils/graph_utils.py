@@ -2,6 +2,8 @@ import dgl
 import torch
 import numpy as np
 
+from copy import deepcopy
+
 
 def get_bonds(bond_types, n_molecule_level=1, n_reaction_level=1, self_bond=True):
     bond_types = list(bond_types)
@@ -38,7 +40,7 @@ def get_graph(rxn,
               self_bond=True,
               pad_length=120,
               device='cuda',
-              features=False
+              feature_idxs=()
               ):
     nodes = list(rxn['reactants']['nodes'])
     sender, reciever, bonds = list(rxn['reactants']['sender']), list(rxn['reactants']['reciever']), list(
@@ -95,9 +97,11 @@ def get_graph(rxn,
     g = dgl.DGLGraph()
     g.add_nodes(len(nodes))
 
-    if features:
-        features = rxn['reactants']['features']
-        pad_features = np.pad(features, ((0, 0), (0, len(nodes) - features.shape[1])))
+    if len(feature_idxs) > 0:
+        features = deepcopy(rxn['reactants']['features'])
+        features[-1] += 5
+        features += 1
+        pad_features = np.pad(features[feature_idxs], ((0, 0), (0, len(nodes) - features.shape[1])))
         g.ndata['feats'] = torch.from_numpy(np.r_[np.array([nodes]), pad_features].T).to(device)
     else:
         g.ndata['feats'] = torch.from_numpy(np.array([nodes]).T).to(device)

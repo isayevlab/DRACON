@@ -24,13 +24,13 @@ def matrices2mol(node_labels, edge_labels):
 
 class Molecule:
     def __init__(self, smarts):
-        self.rdkit_molecule = Chem.MolFromSmarts(smarts)
+        self.rdkit_molecule = Chem.MolFromSmiles(smarts)
         self.rdkit_molecule.UpdatePropertyCache(strict=False)
 
     def get_senders_recievers_types(self):
         senders = [b.GetBeginAtomIdx() for b in self.rdkit_molecule.GetBonds()]
         receivers = [b.GetEndAtomIdx() for b in self.rdkit_molecule.GetBonds()]
-        b_types = [str(b.GetBondType()) for b in self.rdkit_molecule.GetBonds()]
+        b_types = ['AROMATIC' if b.GetIsAromatic() else str(b.GetBondType()) for b in self.rdkit_molecule.GetBonds()]
         return (np.array(senders, dtype=np.int32),
                 np.array(receivers, dtype=np.int32),
                 np.array(b_types, dtype='<U10'))

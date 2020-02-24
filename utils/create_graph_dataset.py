@@ -1,3 +1,6 @@
+import sys
+sys.path.append('..')
+
 import pandas as pd
 import pickle
 import numpy as np
@@ -71,22 +74,25 @@ def get_smarts(mode='train', max_num_molecules=15):
     elif mode == 'test':
         dataset = pd.read_csv('../data/US_patents_1976-Sep2016_1product_reactions_test.csv', header=2, sep='\t')
     else:
-        dataset = pd.read_csv('../data/US_patents_1976-Sep2016_1product_reactions_.csv', header=2, sep='\t')
+        dataset = pd.read_csv('../data/US_patents_1976-Sep2016_1product_reactions_valid.csv', header=2, sep='\t')
     smarts = dataset['OriginalReaction']
+    smiles = dataset['CanonicalizedReaction']
     smarts = smarts.apply(f)
-    idxs =[]
+    idxs = []
     new_smarts = []
-    for j, i in enumerate(smarts):
+    new_smiles = []
+    for j, (i, k) in enumerate(zip(smarts, smiles)):
         if ('>' in i):
             if (len(i.split('>')[0].split('.')) + len(i.split('>')[1].split('.'))) < 15:
                 new_smarts.append(i)
+                new_smiles.append(k)
                 idxs.append(j)
-    return list(zip(idxs, new_smarts))
+    return list(zip(idxs, new_smarts, new_smiles))
 
 
 def build_dataset(data):
     dataset = {}
-    for idx, smarts in tqdm(data):
+    for idx, smarts, smiles in tqdm(data):
         product = {}
         reactants = {}
         rxn = Reaction(smarts)
@@ -100,7 +106,6 @@ def build_dataset(data):
         reactants['features'] = react_features
         reactants['mask'] = rxn.reactants.get_atoms_mapping()
 
-
         sender, reciever, types = rxn.product.get_senders_recievers_types()
         product['sender'], product['reciever'], product['types'] = sender, reciever, types
         nodes = rxn.product.get_node_types()
@@ -112,11 +117,13 @@ def build_dataset(data):
 
         target_main_product = rxn.get_product_mask()
         target_center = get_center_target(rxn)
-
-        dataset[idx] = {'product': product,
-                        'reactants': reactants,
-                        'target_main_product': target_main_product,
-                        'target_center': target_center}
+        if len(product['mask']) == len(np.unique(product['mask'])):
+            dataset[idx] = {'product': product,
+                            'reactants': reactants,
+                            'target_main_product': target_main_product,
+                            'target_center': target_center,
+                            'smarts': smarts,
+                            'smiles': smiles}
     return dataset
 
 
@@ -150,13 +157,13 @@ if __name__ == '__main__':
     valid = get_smarts(mode='valid')
     feature_names = Molecule.get_node_features_name()
 
-    train_dataset = build_dataset(train)
-    with open('../data/graphs/train.pkl', 'wb') as f:
-        pickle.dump(train_dataset, f)
-
     test_dataset = build_dataset(test)
     with open('../data/graphs/test.pkl', 'wb') as f:
         pickle.dump(test_dataset, f)
+
+    train_dataset = build_dataset(train)
+    with open('../data/graphs/train.pkl', 'wb') as f:
+        pickle.dump(train_dataset, f)
 
     valid_dataset = build_dataset(valid)
     with open('../data/graphs/valid.pkl', 'wb') as f:

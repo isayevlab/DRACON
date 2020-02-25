@@ -1,0 +1,31 @@
+paths:
+  result_path: '../data/results/graph_models/C_T.pkl'
+  dataset_path: '../data/graphs/'
+  save_path: '../data/models/C_T.torch'
+
+dataset:
+  n_molecule_level: 0
+  n_reaction_level: 0
+  max_num_atoms: 50
+  self_bond: True
+  same_bond: True
+  feature_idxs: []
+  feature_sizes: []
+  target_center: True
+  target_main_product: False
+
+model:
+  n_hidden: 64
+  num_conv_layers: 4
+  num_fcn_layers: 2
+  num_trans_layers: 2
+  num_attention_heads: 2
+  num_model_heads: 1
+  feature_embed_size: 8
+
+train:
+  batch_size: 128
+  lr: 0.001
+  n_epoches: 5
+  exp_step_size: 10000
+  eval_names: ['Center of reaction']

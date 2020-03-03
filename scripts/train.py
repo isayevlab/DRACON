@@ -1,112 +1,107 @@
-import sys
-sys.path.append('..')
-
 import torch
 import pickle
 import argparse
 import yaml
+import numpy as np
+import init_path
 
 from torch.utils.data.dataloader import DataLoader
-
 from reaction_predictors.graph_model.models import RGCNNTrClassifier
 from utils.graph_utils import get_bonds, get_nodes
 from utils.torch_dataset import Dataset, graph_collate
-from utils.draw_utils import prune_dataset_by_length
 from reaction_predictors.graph_model.model_utils import train_epoch, evaluate, test
+from collections import namedtuple
+
+
+def prune_dataset_by_length(dataset, max_len):
+    new_dataset = {}
+    for idx in dataset:
+        r_mask = dataset[idx]['reactants']['mask']
+        r_mask = r_mask[r_mask > 0]
+        if len(dataset[idx]['target_main_product']) <= max_len and len(np.unique(r_mask)) == len(r_mask):
+            new_dataset[idx] = dataset[idx]
+    return new_dataset
+
+
+def convert(dictionary):
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            dictionary[key] = convert(value)
+    return namedtuple('GenericDict', dictionary.keys())(**dictionary)
 
 
 def main(config, device):
-    result_path = config["paths"]["result_path"]
-    dataset_path = config["paths"]["dataset_path"]
-    save_path = config["paths"]["save_path"]
+    model_cfg = convert(config["model"])
+    data_cfg = convert(config["dataset"])
+    train_cfg = convert(config["train"])
+    paths = convert(config["paths"])
 
-    n_molecule_level = config["dataset"]["n_molecule_level"]
-    n_reaction_level = config["dataset"]["n_reaction_level"]
-    max_num_atoms = config["dataset"]["max_num_atoms"]
-    self_bond = config["dataset"]["self_bond"]
-    same_bond = config["dataset"]["same_bond"]
-    feature_idxs = config["dataset"]["feature_idxs"]
-    feature_sizes = config["dataset"]["feature_sizes"]
-    target_center = config["dataset"]["target_center"]
-    target_main_product = config["dataset"]["target_main_product"]
+    meta = pickle.load(open(paths.dataset_path + 'meta.pkl', 'rb'))
 
-    n_hidden = config["model"]["n_hidden"]
-    num_conv_layers = config["model"]["num_conv_layers"]
-    num_fcn_layers = config["model"]["num_fcn_layers"]
-    num_trans_layers = config["model"]["num_trans_layers"]
-    num_attention_heads = config["model"]["num_attention_heads"]
-    num_model_heads = config["model"]["num_model_heads"]
-    feature_embed_size = config["model"]["feature_embed_size"]
-
-    batch_size = config["train"]["batch_size"]
-    lr = config["train"]["lr"]
-    n_epoches = config["train"]["n_epoches"]
-    exp_step_size = config["train"]["exp_step_size"]
-    eval_names = config["train"]["eval_names"]
-
-    meta = pickle.load(open(dataset_path + 'meta.pkl', 'rb'))
-
-    node2label = get_nodes(meta['node'], n_molecule_level=n_molecule_level, n_reaction_level=n_reaction_level)
-    bond2label = get_bonds(meta['type'], n_molecule_level=n_molecule_level, n_reaction_level=n_reaction_level,
-                           self_bond=self_bond)
-    if same_bond:
-        bond2label = {i: 0 for i in bond2label}
+    node2label = get_nodes(meta['node'], n_molecule_level=data_cfg.n_molecule_level,
+                           n_reaction_level=data_cfg.n_reaction_level)
+    bond2label = get_bonds(meta['type'], n_molecule_level=data_cfg.n_molecule_level,
+                           n_reaction_level=data_cfg.n_reaction_level,
+                           self_bond=data_cfg.self_bond)
+    if data_cfg.same_bond:
+        bond2label = {i: 0 if i in meta['type'] else bond2label[i] for i in bond2label}
     num_rels = len(bond2label)
-    pad_length = max_num_atoms + 15*n_molecule_level + n_molecule_level*n_reaction_level
+    pad_length = data_cfg.max_num_atoms + 15 * data_cfg.n_molecule_level + \
+                 data_cfg.n_molecule_level * data_cfg.n_reaction_level
     num_nodes = pad_length
 
-    model = RGCNNTrClassifier([len(node2label)]+feature_sizes,
-                  num_nodes,
-                  batch_size,
-                  [n_hidden]+[feature_embed_size]*len(feature_sizes),
-                  num_rels,
-                  num_conv_layers,
-                  num_trans_layers,
-                  num_fcn_layers,
-                  num_attention_heads,
-                  num_model_heads,
-                 )
+    model = RGCNNTrClassifier([len(node2label)] + data_cfg.feature_sizes,
+                              num_nodes,
+                              train_cfg.batch_size,
+                              [model_cfg.n_hidden] + [model_cfg.feature_embed_size] * len(data_cfg.feature_sizes),
+                              num_rels,
+                              model_cfg.num_conv_layers,
+                              model_cfg.num_trans_layers,
+                              model_cfg.num_fcn_layers,
+                              model_cfg.num_attention_heads,
+                              model_cfg.num_model_heads,
+                              )
     model = model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.98), eps=1e-9)
-    exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=exp_step_size, gamma=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), lr=train_cfg.lr, betas=(0.9, 0.98), eps=1e-9)
+    exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=train_cfg.exp_step_size, gamma=0.1)
 
-    train_dataset = pickle.load(open(dataset_path + 'train.pkl', 'rb'))
-    test_dataset = pickle.load(open(dataset_path + 'test.pkl', 'rb'))
-    valid_dataset = pickle.load(open(dataset_path + 'valid.pkl', 'rb'))
+    train_dataset = pickle.load(open(paths.dataset_path + 'train.pkl', 'rb'))
+    test_dataset = pickle.load(open(paths.dataset_path + 'test.pkl', 'rb'))
+    valid_dataset = pickle.load(open(paths.dataset_path + 'valid.pkl', 'rb'))
 
-    train_dataset = prune_dataset_by_length(train_dataset, max_num_atoms)
-    test_dataset = prune_dataset_by_length(test_dataset, max_num_atoms)
-    valid_dataset = prune_dataset_by_length(valid_dataset, max_num_atoms)
+    train_dataset = prune_dataset_by_length(train_dataset, data_cfg.max_num_atoms)
+    test_dataset = prune_dataset_by_length(test_dataset, data_cfg.max_num_atoms)
+    valid_dataset = prune_dataset_by_length(valid_dataset, data_cfg.max_num_atoms)
 
     tr_dataset = Dataset(train_dataset, device=device, pad_length=pad_length,
-                         bond2label=bond2label, node2label=node2label, feature_idxs=feature_idxs,
-                         target_main_product=target_main_product, target_center=target_center,
-                         n_molecule_level=n_molecule_level, n_reaction_level=n_reaction_level)
+                         bond2label=bond2label, node2label=node2label, feature_idxs=data_cfg.feature_idxs,
+                         target_main_product=data_cfg.target_main_product, target_center=data_cfg.target_center,
+                         n_molecule_level=data_cfg.n_molecule_level, n_reaction_level=data_cfg.n_reaction_level)
     ts_dataset = Dataset(test_dataset, device=device, pad_length=pad_length,
-                         bond2label=bond2label, node2label=node2label, feature_idxs=feature_idxs,
-                         target_main_product=target_main_product, target_center=target_center,
-                         n_molecule_level=n_molecule_level, n_reaction_level=n_reaction_level)
+                         bond2label=bond2label, node2label=node2label, feature_idxs=data_cfg.feature_idxs,
+                         target_main_product=data_cfg.target_main_product, target_center=data_cfg.target_center,
+                         n_molecule_level=data_cfg.n_molecule_level, n_reaction_level=data_cfg.n_reaction_level)
     vl_dataset = Dataset(valid_dataset, device=device, pad_length=pad_length,
-                         bond2label=bond2label, node2label=node2label, feature_idxs=feature_idxs,
-                         target_main_product=target_main_product, target_center=target_center,
-                         n_molecule_level=n_molecule_level, n_reaction_level=n_reaction_level)
+                         bond2label=bond2label, node2label=node2label, feature_idxs=data_cfg.feature_idxs,
+                         target_main_product=data_cfg.target_main_product, target_center=data_cfg.target_center,
+                         n_molecule_level=data_cfg.n_molecule_level, n_reaction_level=data_cfg.n_reaction_level)
 
-    train_loader = DataLoader(tr_dataset, batch_size, drop_last=True, collate_fn=graph_collate)
-    test_loader = DataLoader(ts_dataset, batch_size, drop_last=True, collate_fn=graph_collate)
-    valid_loader = DataLoader(vl_dataset, batch_size, drop_last=True, collate_fn=graph_collate)
+    train_loader = DataLoader(tr_dataset, train_cfg.batch_size, drop_last=True, collate_fn=graph_collate)
+    test_loader = DataLoader(ts_dataset, train_cfg.batch_size, drop_last=True, collate_fn=graph_collate)
+    valid_loader = DataLoader(vl_dataset, train_cfg.batch_size, drop_last=True, collate_fn=graph_collate)
 
     valid_scores = []
     losses = []
     print('Training is starting')
-    for epoch in range(n_epoches):
+    for epoch in range(train_cfg.n_epoches):
         losses.append(train_epoch(model, train_loader, optimizer, exp_lr_scheduler))
         print(f'Epoch number - {epoch}')
-        valid_scores.append(evaluate(model, valid_loader, eval_names))
-        torch.save(model, save_path)
+        valid_scores.append(evaluate(model, valid_loader, train_cfg.eval_names))
+        torch.save(model, paths.save_path)
     print(f'Final result')
-    test_score = evaluate(model, test_loader, eval_names)
+    test_score = evaluate(model, test_loader, train_cfg.eval_names)
 
-    with open(result_path, 'wb') as f:
+    with open(paths.result_path, 'wb') as f:
         pickle.dump([test_score, losses, valid_scores], f)
 
 
@@ -116,6 +111,5 @@ if __name__ == '__main__':
     parser.add_argument("--device", default='cuda:0', help="Device to run and train model")
     args = parser.parse_args()
     with open(args.config, 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
     main(cfg, args.device)
-

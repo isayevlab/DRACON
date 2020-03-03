@@ -1,17 +1,17 @@
 paths:
-  result_path: '../data/results/graph_models/MP_EGTBF.pkl'
+  result_path: '../data/results/graph_models/MT_EGTBF_150.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/MP_EGTBF.torch'
+  save_path: '../data/models/MT_EGTBF_150.torch'
 
 dataset:
   n_molecule_level: 1
   n_reaction_level: 1
-  max_num_atoms: 50
+  max_num_atoms: 150
   self_bond: True
   same_bond: False
   feature_idxs:  [0, 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10]
   feature_sizes: [9, 16, 8, 6, 3, 3, 8, 6, 3, 12, 13]
-  target_center: False
+  target_center: True
   target_main_product: True
 
 model:
@@ -20,13 +20,13 @@ model:
   num_fcn_layers: 2
   num_trans_layers: 2
   num_attention_heads: 2
-  num_model_heads: 1
+  num_model_heads: 2
   feature_embed_size: 8
 
 
 train:
-  batch_size: 64
+  batch_size: 24
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000
-  eval_names: ['Main product mapping']
+  eval_names: ['Main product mapping', 'Center of reaction']

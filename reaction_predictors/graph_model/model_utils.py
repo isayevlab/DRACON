@@ -21,7 +21,7 @@ def train_epoch(model, loader, optimizer, scheduler, clip_grad=1e-3):
     return loss_list
 
 
-def test(model, loader):
+def test(model, loader, drop_pad=True):
     sigmoid = nn.Sigmoid()
     model.eval()
     result = []
@@ -35,8 +35,9 @@ def test(model, loader):
                 predicted = (sigmoid(out) > .5).float().cpu().detach().numpy()
                 target = target.float().cpu().detach().numpy()
                 for pred, tar in zip(predicted, target):
-                    pred = pred[tar != -1]
-                    tar = tar[tar != -1]
+                    if drop_pad:
+                        pred = pred[tar != -1]
+                        tar = tar[tar != -1]
                     result[i]['target'].append(tar)
                     result[i]['predicted'].append(pred)
     return result
@@ -56,4 +57,3 @@ def evaluate(model, loader, names=['Main product mapping', 'Detection of cenetr 
         scores[key]['FM_mean'] = mean_fm
         print(f'{names[key]} was done with {mean_f1} F1-measure and {mean_fm} full-match accuracy')
     return scores
-

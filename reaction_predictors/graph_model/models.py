@@ -23,7 +23,10 @@ class RGCNNTrClassifier(nn.Module):
         self.h_dim = sum(h_dims)
         self.batch_size = batch_size
         self.embed = Embedding(feat_sizes, h_dims)
-        self.rgcn = RGCNModel(self.h_dim, num_rels, num_conv_layers, bias=None)
+        if num_conv_layers > 0:
+            self.rgcn = RGCNModel(self.h_dim, num_rels, num_conv_layers, bias=None)
+        else:
+            self.rgcn = None
         self.sigmoid = nn.Sigmoid()
         self.criterion = nn.BCEWithLogitsLoss()
         if num_trans_layers > 0:
@@ -42,8 +45,10 @@ class RGCNNTrClassifier(nn.Module):
 
     def forward(self, g):
         h = self.embed(g.ndata['feats'].T)
-        g.ndata['h'] = h
-        h = self.rgcn(g).view((self.batch_size, self.n_nodes, self.h_dim))
+        if self.rgcn is not None:
+            g.ndata['h'] = h
+            h = self.rgcn(g)
+        h = h.view((self.batch_size, self.n_nodes, self.h_dim))
         if self.trans is not None:
             h = self.trans(h.permute(1, 0, 2)).permute(1, 0, 2)
         outs = []

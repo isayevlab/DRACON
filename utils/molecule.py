@@ -3,13 +3,6 @@ import numpy as np
 from rdkit.Chem import AllChem
 from rdkit import Chem
 
-# bond_types = [ 'UNSPECIFIED', 'SINGLE', 'DOUBLE', 'TRIPLE', 'QUADRUPLE', 'QUINTUPLE', 'HEXTUPLE', 'ONEANDAHALF',
-#                'TWOANDAHALF', 'THREEANDAHALF', 'FOURANDAHALF', 'FIVEANDAHALF', 'AROMATIC', 'IONIC', 'HYDROGEN',
-#                'THREECENTER', 'DATIVEONE', 'DATIVE', 'DATIVEL', 'DATIVER', 'OTHER', 'ZERO']
-# bond_decoder = dict(enumerate(bond_types))
-# bond_encoder = dict(zip(bond_types, range(len(bond_types))))
-#
-
 
 def matrices2mol(node_labels, edge_labels):
     mol = Chem.RWMol()
@@ -56,6 +49,7 @@ class Molecule:
         return Chem.MolToSmarts(self.rdkit_molecule)
 
     def get_node_features(self):
+
         degrees = [a.GetDegree() for a in self.rdkit_molecule.GetAtoms()]
         exp_valences = [a.GetExplicitValence() for a in self.rdkit_molecule.GetAtoms()]
         hybridization = [int(a.GetHybridization()) for a in self.rdkit_molecule.GetAtoms()]

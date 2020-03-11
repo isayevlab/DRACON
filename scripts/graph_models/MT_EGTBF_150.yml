@@ -9,8 +9,8 @@ dataset:
   max_num_atoms: 150
   self_bond: True
   same_bond: False
-  feature_idxs:  [0, 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10]
-  feature_sizes: [9, 16, 8, 6, 3, 3, 8, 6, 3, 12, 13]
+  feature_idxs:  [0, 1 , 2, 3, 4, 6, 7, 8, 9, 10]
+  feature_sizes: [9, 16, 8, 6, 3, 8, 6, 3, 12, 13]
   target_center: True
   target_main_product: True
 

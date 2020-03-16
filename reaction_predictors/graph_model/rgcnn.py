@@ -6,14 +6,13 @@ import dgl.function as fn
 
 class RGCNLayer(nn.Module):
     def __init__(self, in_feat, out_feat, num_rels, bias=None,
-                 activation=None, is_input_layer=False):
+                 activation=None):
         super(RGCNLayer, self).__init__()
         self.in_feat = in_feat
         self.out_feat = out_feat
         self.num_rels = num_rels
         self.bias = bias
         self.activation = activation
-        self.is_input_layer = is_input_layer
 
         self.weight = nn.Parameter(torch.Tensor(self.num_rels, self.in_feat,
                                                 self.out_feat))
@@ -30,10 +29,8 @@ class RGCNLayer(nn.Module):
 
     def forward(self, g):
 
-        weight = self.weight
-
         def message_func(edges):
-            w = weight[edges.data['rel_type']]
+            w = self.weight[edges.data['rel_type']]
             msg = torch.bmm(edges.src['h'].unsqueeze(1), w).squeeze()
             return {'msg': msg}
 

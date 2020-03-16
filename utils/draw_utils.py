@@ -78,8 +78,8 @@ def get_molecule_svg(mol, dpa=100, target=None, target_type=None, gt_colors=None
     return png
 
 
-def draw_gt_reaction(data):
-    r_mol, p_mol = get_react_prouct(data['smarts'])
+def draw_gt_reaction(data, mapping=False):
+    r_mol, p_mol = get_react_prouct(data['smarts'], mapping)
     rdDepictor.Compute2DCoords(r_mol)
     rdDepictor.Compute2DCoords(p_mol)
     target_reactants = data['target_main_product'] + data['target_center']

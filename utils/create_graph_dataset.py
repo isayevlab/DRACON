@@ -140,6 +140,10 @@ def get_meta(datasets, faeture_names):
                 meta['type'].update(list(dataset[idx][part]['types']))
                 for name, feature in zip(faeture_names, dataset[idx][part]['features']):
                     meta['features'][name].update(list(feature))
+    meta['type'] = list(meta['type'])
+    meta['node'] = list(meta['node'])
+    for name in faeture_names:
+        meta['features'][name] = list(meta['features'][name])
     return meta
 
 

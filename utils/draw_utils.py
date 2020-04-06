@@ -3,11 +3,12 @@ import re
 
 from rdkit import Chem, Geometry
 from rdkit.Chem import rdDepictor
-rdDepictor.SetPreferCoordGen(True)
 from rdkit.Chem.Draw import rdMolDraw2D
 
+rdDepictor.SetPreferCoordGen(True)
 
-def draw_molecule(m, node2color, dpa):
+
+def draw_molecule(m, node2color, dpa, fontsize):
     mol = Chem.Mol(m.ToBinary())
     rdDepictor.Compute2DCoords(mol, bondLength=-1.0)
     coords = mol.GetConformer(-1).GetPositions()
@@ -31,6 +32,7 @@ def draw_molecule(m, node2color, dpa):
 
     drawer = rdMolDraw2D.MolDraw2DSVG(w, h)
     drawer.SetScale(w, h, min_p, max_p)
+    drawer.SetFontSize(fontsize)
     drawer.DrawMolecule(mol, highlightAtoms=list(node2color.keys()), highlightAtomColors=node2color, highlightBonds=mcs_bonds,
                         highlightBondColors=b_col, )
     drawer.FinishDrawing()
@@ -63,7 +65,7 @@ def get_target_product(data):
     return target
 
 
-def get_molecule_svg(mol, dpa=100, target=None, target_type=None, gt_colors=None):
+def get_molecule_svg(mol, dpa=100, target=None, target_type=None, gt_colors=None, fontsize=0.98):
     if target is None:
         png = draw_molecule(mol, {}, dpa)
     elif target_type == 'GT':
@@ -71,14 +73,14 @@ def get_molecule_svg(mol, dpa=100, target=None, target_type=None, gt_colors=None
         for j, i in enumerate(target):
             if i in gt_colors:
                 atom2color[j] = gt_colors[i]
-        png = draw_molecule(mol, atom2color, dpa)
+        png = draw_molecule(mol, atom2color, dpa, fontsize)
     else:
         atom2color = {j: (i, 1-i, 1-i) for (j, i) in enumerate(target)}
-        png = draw_molecule(mol, atom2color, dpa)
+        png = draw_molecule(mol, atom2color, dpa, fontsize)
     return png
 
 
-def draw_gt_reaction(data, mapping=False):
+def draw_gt_reaction(data, mapping=False, fontsize=0.98, gt_colors={1: (0.7, 1, 0.7), 2: (1, 0.7, 0.7)}):
     r_mol, p_mol = get_react_prouct(data['smarts'], mapping)
     rdDepictor.Compute2DCoords(r_mol)
     rdDepictor.Compute2DCoords(p_mol)
@@ -86,8 +88,8 @@ def draw_gt_reaction(data, mapping=False):
     target_reactants[target_reactants == -1] = 0
     target_product = get_target_product(data) + 1
     r_png = get_molecule_svg(r_mol, target=target_reactants, target_type='GT',
-                             gt_colors={1: (0.7, 1, 0.7), 2: (1, 0.7, 0.7)}, dpa=100)
+                             gt_colors=gt_colors, dpa=100, fontsize=fontsize)
     p_png = get_molecule_svg(p_mol, target=target_product, target_type='GT',
-                             gt_colors={1: (0.7, 1, 0.7), 2: (1, 0.7, 0.7)}, dpa=100)
+                             gt_colors=gt_colors, dpa=100, fontsize=fontsize)
     return p_png, r_png
 

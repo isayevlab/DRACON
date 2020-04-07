@@ -70,11 +70,11 @@ def get_center_target(rxn):
 
 def get_smarts(mode='train', max_num_molecules=15):
     if mode == 'train':
-        dataset = pd.read_csv('../data/US_patents_1976-Sep2016_1product_reactions_train.csv', header=2, sep='\t')
+        dataset = pd.read_csv('../data/train.csv', header=2, sep='\t')
     elif mode == 'test':
-        dataset = pd.read_csv('../data/US_patents_1976-Sep2016_1product_reactions_test.csv', header=2, sep='\t')
+        dataset = pd.read_csv('../data/test.csv', header=2, sep='\t')
     else:
-        dataset = pd.read_csv('../data/US_patents_1976-Sep2016_1product_reactions_valid.csv', header=2, sep='\t')
+        dataset = pd.read_csv('../data/valid.csv', header=2, sep='\t')
     smarts = dataset['OriginalReaction']
     smiles = dataset['CanonicalizedReaction']
     smarts = smarts.apply(f)

@@ -1,27 +1,27 @@
 paths:
-  result_path: '../data/results/graph_models/C_TBF_sm_vis.pkl'
+  result_path: '../data/results/atom_classification/C_T.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/C_TBF_sm_vis.torch'
+  save_path: '../data/models/C_T.torch'
 
 dataset:
   n_molecule_level: 0
   n_reaction_level: 0
   max_num_atoms: 50
   self_bond: True
-  same_bond: False
-  feature_idxs:  [0, 1 , 2, 3, 4, 6, 7, 8, 9, 10]
-  feature_sizes: [9, 16, 8, 6, 3, 8, 6, 3, 12, 13]
+  same_bond: True
+  feature_idxs: []
+  feature_sizes: []
   target_center: True
   target_main_product: False
 
 model:
-  n_hidden: 32
+  n_hidden: 64
   num_conv_layers: 4
-  num_fcn_layers: 1
-  num_trans_layers: 1
-  num_attention_heads: 1
+  num_fcn_layers: 2
+  num_trans_layers: 2
+  num_attention_heads: 2
   num_model_heads: 1
-  feature_embed_size: 4
+  feature_embed_size: 8
 
 train:
   batch_size: 128

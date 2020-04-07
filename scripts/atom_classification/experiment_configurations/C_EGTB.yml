@@ -1,5 +1,5 @@
 paths:
-  result_path: '../data/results/graph_models/C_EGTB.pkl'
+  result_path: '../data/results/atom_classification/C_EGTB.pkl'
   dataset_path: '../data/graphs/'
   save_path: '../data/models/C_EGTB.torch'
 

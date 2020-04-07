@@ -1,5 +1,5 @@
 paths:
-  result_path: '../data/results/graph_models/MT_EGTBF_150.pkl'
+  result_path: '../data/results/atom_classification/MT_EGTBF_150.pkl'
   dataset_path: '../data/graphs/'
   save_path: '../data/models/MT_EGTBF_150.torch'
 

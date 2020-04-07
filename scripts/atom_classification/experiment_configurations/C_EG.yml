@@ -1,11 +1,11 @@
 paths:
-  result_path: '../data/results/graph_models/C_BASE.pkl'
+  result_path: '../data/results/atom_classification/C_EG.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/C_BASE.torch'
+  save_path: '../data/models/C_EG.torch'
 
 dataset:
-  n_molecule_level: 0
-  n_reaction_level: 0
+  n_molecule_level: 1
+  n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
   same_bond: True

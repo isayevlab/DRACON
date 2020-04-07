@@ -1,18 +1,18 @@
 paths:
-  result_path: '../data/results/graph_models/C_EGT.pkl'
+  result_path: '../data/results/atom_classification/MP_EGTBF.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/C_EGT.torch'
+  save_path: '../data/models/MP_EGTBF.torch'
 
 dataset:
   n_molecule_level: 1
   n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
-  same_bond: True
-  feature_idxs: []
-  feature_sizes: []
-  target_center: True
-  target_main_product: False
+  same_bond: False
+  feature_idxs:  [0, 1 , 2, 3, 4, 6, 7, 8, 9, 10]
+  feature_sizes: [9, 16, 8, 6, 3, 8, 6, 3, 12, 13]
+  target_center: False
+  target_main_product: True
 
 model:
   n_hidden: 64
@@ -25,8 +25,8 @@ model:
 
 
 train:
-  batch_size: 128
+  batch_size: 64
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000
-  eval_names: ['Center of reaction']
+  eval_names: ['Main product mapping']

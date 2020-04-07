@@ -1,12 +1,12 @@
 paths:
-  result_path: '../data/results/graph_models/MT_EGTBF.pkl'
+  result_path: '../data/results/atom_classification/MT_EGTBF_100.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/MT_EGTBF.torch'
+  save_path: '../data/models/MT_EGTBF_100.torch'
 
 dataset:
   n_molecule_level: 1
   n_reaction_level: 1
-  max_num_atoms: 50
+  max_num_atoms: 100
   self_bond: True
   same_bond: False
   feature_idxs:  [0, 1 , 2, 3, 4, 6, 7, 8, 9, 10]
@@ -25,7 +25,7 @@ model:
 
 
 train:
-  batch_size: 64
+  batch_size: 32
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000

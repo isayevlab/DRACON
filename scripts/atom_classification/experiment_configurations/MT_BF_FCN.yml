@@ -1,7 +1,7 @@
 paths:
-  result_path: '../data/results/graph_models/MT_BF.pkl'
+  result_path: '../data/results/atom_classification/MT_BF_FCN.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/MT_BF.torch'
+  save_path: '../data/models/MT_BF_FCN.torch'
 
 dataset:
   n_molecule_level: 0
@@ -16,7 +16,7 @@ dataset:
 
 model:
   n_hidden: 64
-  num_conv_layers: 4
+  num_conv_layers: 0
   num_fcn_layers: 2
   num_trans_layers: 0
   num_attention_heads: 2

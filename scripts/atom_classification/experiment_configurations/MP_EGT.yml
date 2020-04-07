@@ -1,5 +1,5 @@
 paths:
-  result_path: '../data/results/graph_models/MP_EGT.pkl'
+  result_path: '../data/results/atom_classification/MP_EGT.pkl'
   dataset_path: '../data/graphs/'
   save_path: '../data/models/MP_EGT.torch'
 

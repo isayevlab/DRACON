@@ -1,14 +1,14 @@
 paths:
-  result_path: '../data/results/graph_models/MP_T.pkl'
+  result_path: '../data/results/atom_classification/MP_EGTB.pkl'
   dataset_path: '../data/graphs/'
-  save_path: '../data/models/MP_T.torch'
+  save_path: '../data/models/MP_EGTB.torch'
 
 dataset:
-  n_molecule_level: 0
-  n_reaction_level: 0
+  n_molecule_level: 1
+  n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
-  same_bond: True
+  same_bond: False
   feature_idxs: []
   feature_sizes: []
   target_center: False

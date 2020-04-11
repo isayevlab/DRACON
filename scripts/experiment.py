@@ -2,32 +2,15 @@ import torch
 import pickle
 import argparse
 import yaml
-import numpy as np
 import init_path
 
 from torch.utils.data.dataloader import DataLoader
-from reaction_predictors.graph_model.models import RGCNNTrClassifier
-from utils.graph_utils import get_bonds, get_nodes
-from utils.torch_dataset import Dataset, graph_collate
-from reaction_predictors.graph_model.model_utils import train_epoch, evaluate, test
-from collections import namedtuple
-
-
-def prune_dataset_by_length(dataset, max_len):
-    new_dataset = {}
-    for idx in dataset:
-        r_mask = dataset[idx]['reactants']['mask']
-        r_mask = r_mask[r_mask > 0]
-        if len(dataset[idx]['target_main_product']) <= max_len and len(np.unique(r_mask)) == len(r_mask):
-            new_dataset[idx] = dataset[idx]
-    return new_dataset
-
-
-def convert(dictionary):
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            dictionary[key] = convert(value)
-    return namedtuple('GenericDict', dictionary.keys())(**dictionary)
+from lib.node_classification_model.models import RGCNNTrClassifier
+from lib.dataset.build_dgl_graph import get_bonds, get_nodes
+from lib.dataset.torch_dataset import Dataset, graph_collate
+from lib.node_classification_model.model_utils import train_epoch, evaluate
+from lib.general_utils import convert
+from lib.dataset.utils import filter_dataset
 
 
 def main(config, device):
@@ -69,9 +52,9 @@ def main(config, device):
     test_dataset = pickle.load(open(paths.dataset_path + 'test.pkl', 'rb'))
     valid_dataset = pickle.load(open(paths.dataset_path + 'valid.pkl', 'rb'))
 
-    train_dataset = prune_dataset_by_length(train_dataset, data_cfg.max_num_atoms)
-    test_dataset = prune_dataset_by_length(test_dataset, data_cfg.max_num_atoms)
-    valid_dataset = prune_dataset_by_length(valid_dataset, data_cfg.max_num_atoms)
+    train_dataset = filter_dataset(train_dataset, data_cfg.max_num_atoms, data_cfg.max_num_reactants)
+    test_dataset = filter_dataset(test_dataset, data_cfg.max_num_atoms, data_cfg.max_num_reactants)
+    valid_dataset = filter_dataset(valid_dataset, data_cfg.max_num_atoms, data_cfg.max_num_reactants)
 
     tr_dataset = Dataset(train_dataset, device=device, pad_length=pad_length,
                          bond2label=bond2label, node2label=node2label, feature_idxs=data_cfg.feature_idxs,

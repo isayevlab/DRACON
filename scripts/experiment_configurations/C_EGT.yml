@@ -1,11 +1,11 @@
 paths:
-  result_path: '../data/results/atom_classification/C_T.pkl'
-  dataset_path: '../data/graphs/'
-  save_path: '../data/models/C_T.torch'
+  result_path: '../data/results/atom_classification/C_EGT.pkl'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO'
+  save_path: '../data/models/atom_classification/C_EGT.torch'
 
 dataset:
-  n_molecule_level: 0
-  n_reaction_level: 0
+  n_molecule_level: 1
+  n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
   same_bond: True
@@ -22,6 +22,7 @@ model:
   num_attention_heads: 2
   num_model_heads: 1
   feature_embed_size: 8
+
 
 train:
   batch_size: 128

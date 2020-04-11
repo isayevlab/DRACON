@@ -1,7 +1,7 @@
 paths:
   result_path: '../data/results/atom_classification/MP_BASE.pkl'
-  dataset_path: '../data/graphs/'
-  save_path: '../data/models/MP_BASE.torch'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO'
+  save_path: '../data/models/atom_classification/MP_BASE.torch'
 
 dataset:
   n_molecule_level: 0

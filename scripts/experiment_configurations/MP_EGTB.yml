@@ -1,7 +1,7 @@
 paths:
-  result_path: '../data/results/atom_classification/MP_EGTBF.pkl'
-  dataset_path: '../data/graphs/'
-  save_path: '../data/models/MP_EGTBF.torch'
+  result_path: '../data/results/atom_classification/MP_EGTB.pkl'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO'
+  save_path: '../data/models/atom_classification/MP_EGTB.torch'
 
 dataset:
   n_molecule_level: 1
@@ -9,8 +9,8 @@ dataset:
   max_num_atoms: 50
   self_bond: True
   same_bond: False
-  feature_idxs:  [0, 1 , 2, 3, 4, 6, 7, 8, 9, 10]
-  feature_sizes: [9, 16, 8, 6, 3, 8, 6, 3, 12, 13]
+  feature_idxs: []
+  feature_sizes: []
   target_center: False
   target_main_product: True
 
@@ -25,7 +25,7 @@ model:
 
 
 train:
-  batch_size: 64
+  batch_size: 128
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000

@@ -4,7 +4,7 @@ import numpy as np
 
 from torch.utils import data
 
-from utils.graph_utils import get_graph
+from lib.dataset.build_dgl_graph import get_graph
 
 
 def graph_collate(batch):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils.molecule import Molecule
+from lib.dataset.molecule import Molecule
 
 
 class Reaction:
@@ -56,4 +56,3 @@ if __name__ == '__main__':
     rxn.get_reactants_adjacency_matrix()
     rxn.get_reactants_node_features()
     rxn.get_reactants_node_types()
-

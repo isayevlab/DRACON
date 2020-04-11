@@ -109,20 +109,3 @@ def get_graph(rxn,
     g.edata['rel_type'] = torch.from_numpy(np.array(bonds)).to(device)
     return g
 
-
-if __name__ == '__main__':
-    import pickle
-    with open('../data/graphs/valid.pkl', 'rb') as f:
-        valid_dataset = pickle.load(f)
-    with open('../data/graphs/meta.pkl', 'rb') as f:
-        meta = pickle.load(f)
-    bond2label = get_bonds(meta['bond'])
-    node2label = get_nodes(meta['node'])
-    print(get_graph(valid_dataset[0], bond2label, node2label))
-    pad_length = 50
-    target_main_product = valid_dataset[0]['target_main_product']
-    target_main_product = np.pad(target_main_product, (0, pad_length - len(target_main_product)), constant_values=-1)
-    target_center = valid_dataset[0]['target_center']
-    target_center = np.pad(target_center, (0, pad_length - len(target_main_product)), constant_values=-1)
-    print(target_main_product)
-    print(target_center)

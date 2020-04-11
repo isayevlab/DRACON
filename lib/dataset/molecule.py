@@ -1,6 +1,5 @@
 import numpy as np
 
-from rdkit.Chem import AllChem
 from rdkit import Chem
 
 
@@ -55,23 +54,21 @@ class Molecule:
         hybridization = [int(a.GetHybridization()) for a in self.rdkit_molecule.GetAtoms()]
         imp_valences = [a.GetImplicitValence() for a in self.rdkit_molecule.GetAtoms()]
         is_aromatic = [a.GetIsAromatic() for a in self.rdkit_molecule.GetAtoms()]
-        is_not_implicit = [a.GetNoImplicit() for a in self.rdkit_molecule.GetAtoms()]
         num_explicit_hs = [a.GetNumExplicitHs() for a in self.rdkit_molecule.GetAtoms()]
         num_implicit_hs = [a.GetNumImplicitHs() for a in self.rdkit_molecule.GetAtoms()]
         is_ring = [a.IsInRing() for a in self.rdkit_molecule.GetAtoms()]
         num_radical_electrons = [a.GetNumRadicalElectrons() for a in self.rdkit_molecule.GetAtoms()]
         formal_charge = [a.GetFormalCharge() for a in self.rdkit_molecule.GetAtoms()]
-        # atom get formal charge
 
-        features = [degrees, exp_valences, hybridization, imp_valences, is_aromatic, is_not_implicit,
+        features = [degrees, exp_valences, hybridization, imp_valences, is_aromatic,
                     num_explicit_hs, num_implicit_hs, is_ring, num_radical_electrons, formal_charge]
         features = np.stack(features)
         features = features.astype(np.int32)
         return features
 
     @staticmethod
-    def get_node_features_name():
-        return ['degree', 'explicit_valence', 'hybridization', 'implicit_valence', 'is_aromatic', 'no_implicit',
+    def get_node_features_names():
+        return ['degree', 'explicit_valence', 'hybridization', 'implicit_valence', 'is_aromatic',
                 'num_explicit_hs', 'num_implicit_hs', 'in_ring', 'num_radical_electrons', 'formal_charge']
 
     def get_atoms_mapping(self):
@@ -91,4 +88,3 @@ if __name__ == "__main__":
     mol.get_node_types()
     mol.get_node_features()
     mol.get_degrees()
-

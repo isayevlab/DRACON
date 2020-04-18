@@ -1,16 +1,16 @@
 paths:
-  result_path: '../data/results/atom_classification/C_EGTBF.pkl'
-  dataset_path: '../data/processed_datasets/USPTO_STEREO'
-  save_path: '../data/models/atom_classification/C_EGTBF.torch'
+  result_path: '../data/results/atom_classification/C_EGT.pkl'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO/'
+  save_path: '../data/models/atom_classification/C_EGT.torch'
 
 dataset:
   n_molecule_level: 1
   n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
-  same_bond: False
-  feature_idxs:  [0, 1 , 2, 3, 4, 5, 6, 7, 8, 9]
-  feature_sizes: [9, 16, 8, 6, 3, 8, 6, 3, 12, 13]
+  same_bond: True
+  feature_idxs: []
+  feature_sizes: []
   target_center: True
   target_main_product: False
 
@@ -23,8 +23,9 @@ model:
   num_model_heads: 1
   feature_embed_size: 8
 
+
 train:
-  batch_size: 64
+  batch_size: 128
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000

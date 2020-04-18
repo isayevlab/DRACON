@@ -1,6 +1,6 @@
 paths:
   result_path: '../data/results/atom_classification/C_EGTB.pkl'
-  dataset_path: '../data/processed_datasets/USPTO_STEREO'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO/'
   save_path: '../data/models/atom_classification/C_EGTB.torch'
 
 dataset:

@@ -1,18 +1,18 @@
 paths:
-  result_path: '../data/results/atom_classification/C_T.pkl'
-  dataset_path: '../data/processed_datasets/USPTO_STEREO'
-  save_path: '../data/models/atom_classification/C_T.torch'
+  result_path: '../data/results/atom_classification/MP_EGT.pkl'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO/'
+  save_path: '../data/models/atom_classification/MP_EGT.torch'
 
 dataset:
-  n_molecule_level: 0
-  n_reaction_level: 0
+  n_molecule_level: 1
+  n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
   same_bond: True
   feature_idxs: []
   feature_sizes: []
-  target_center: True
-  target_main_product: False
+  target_center: False
+  target_main_product: True
 
 model:
   n_hidden: 64
@@ -28,4 +28,4 @@ train:
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000
-  eval_names: ['Center of reaction']
+  eval_names: ['Main product mapping']

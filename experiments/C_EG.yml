@@ -1,24 +1,24 @@
 paths:
-  result_path: '../data/results/atom_classification/MP_EGTB.pkl'
-  dataset_path: '../data/processed_datasets/USPTO_STEREO'
-  save_path: '../data/models/atom_classification/MP_EGTB.torch'
+  result_path: '../data/results/atom_classification/C_EG.pkl'
+    dataset_path: '../data/processed_datasets/USPTO_STEREO/'
+  save_path: '../data/models/atom_classification/C_EG.torch'
 
 dataset:
   n_molecule_level: 1
   n_reaction_level: 1
   max_num_atoms: 50
   self_bond: True
-  same_bond: False
+  same_bond: True
   feature_idxs: []
   feature_sizes: []
-  target_center: False
-  target_main_product: True
+  target_center: True
+  target_main_product: False
 
 model:
   n_hidden: 64
   num_conv_layers: 4
   num_fcn_layers: 2
-  num_trans_layers: 2
+  num_trans_layers: 0
   num_attention_heads: 2
   num_model_heads: 1
   feature_embed_size: 8
@@ -29,4 +29,4 @@ train:
   lr: 0.001
   n_epoches: 5
   exp_step_size: 10000
-  eval_names: ['Main product mapping']
+  eval_names: ['Center of reaction']

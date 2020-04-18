@@ -1,12 +1,13 @@
 paths:
-  result_path: '../data/results/atom_classification/C_EG.pkl'
-    dataset_path: '../data/processed_datasets/USPTO_STEREO'
-  save_path: '../data/models/atom_classification/C_EG.torch'
+  result_path: '../data/results/atom_classification/C_BASE.pkl'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO/'
+  save_path: '../data/models/atom_classification/C_BASE.torch'
 
 dataset:
-  n_molecule_level: 1
-  n_reaction_level: 1
+  n_molecule_level: 0
+  n_reaction_level: 0
   max_num_atoms: 50
+  max_num_reactants: 15
   self_bond: True
   same_bond: True
   feature_idxs: []

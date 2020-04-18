@@ -1,7 +1,7 @@
 paths:
-  result_path: '../data/results/atom_classification/MP_BASE.pkl'
-  dataset_path: '../data/processed_datasets/USPTO_STEREO'
-  save_path: '../data/models/atom_classification/MP_BASE.torch'
+  result_path: '../data/results/atom_classification/MP_T.pkl'
+  dataset_path: '../data/processed_datasets/USPTO_STEREO/'
+  save_path: '../data/models/atom_classification/MP_T.torch'
 
 dataset:
   n_molecule_level: 0
@@ -18,10 +18,11 @@ model:
   n_hidden: 64
   num_conv_layers: 4
   num_fcn_layers: 2
-  num_trans_layers: 0
+  num_trans_layers: 2
   num_attention_heads: 2
   num_model_heads: 1
   feature_embed_size: 8
+
 
 train:
   batch_size: 128

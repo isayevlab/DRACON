@@ -9,7 +9,7 @@ from sklearn.metrics import f1_score
 def train_epoch(model, loader, optimizer, scheduler, clip_grad=1e-3):
     model.train()
     loss_list = []
-    for batch in loader:
+    for j, batch in enumerate(loader):
         graph, targets = batch[0], batch[1:]
         optimizer.zero_grad()
         loss = model.get_loss(graph, targets)

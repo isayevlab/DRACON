@@ -99,7 +99,6 @@ def get_graph(rxn,
 
     if len(feature_idxs) > 0:
         features = deepcopy(rxn['reactants']['features'])
-        features[-1] += 5
         features += 1
         pad_features = np.pad(features[feature_idxs], ((0, 0), (0, len(nodes) - features.shape[1])))
         g.ndata['feats'] = torch.from_numpy(np.r_[np.array([nodes]), pad_features].T).to(device)

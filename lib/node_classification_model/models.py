@@ -1,9 +1,9 @@
 from torch import nn
 
-from reaction_predictors.graph_model.fcnn import FCNModel
-from reaction_predictors.graph_model.rgcnn import RGCNModel
-from reaction_predictors.graph_model.transformer import TransModel
-from reaction_predictors.graph_model.emdedding import Embedding
+from lib.model.fcnn import FCNModel
+from lib.model.rgcnn import RGCNModel
+from lib.model.transformer import TransModel
+from lib.model.emdedding import Embedding
 
 
 class RGCNNTrClassifier(nn.Module):

@@ -4,6 +4,7 @@ from tqdm import tqdm
 from lib.dataset.reaction import Reaction
 from lib.dataset.molecule import Molecule
 from lib.dataset.utils import get_molecule_lengths
+from collections import OrderedDict
 
 
 def get_center_target(rxn):
@@ -53,7 +54,7 @@ def build_dataset(initial_dataset, atom_labels=True):
     dataset = {}
     for idx in tqdm(initial_dataset.index):
         data = initial_dataset.loc[idx]
-        smarts = data['smarts']
+        smarts = data['smarts'].split('|')[0]
         product = {}
         reactants = {}
         rxn = Reaction(smarts)
@@ -89,7 +90,7 @@ def build_dataset(initial_dataset, atom_labels=True):
 def get_meta(datasets):
     meta = {'type': set(),
             'node': set(),
-            'features': {}}
+            'features': OrderedDict()}
     feature_names = Molecule.get_node_features_names()
     for name in feature_names:
         meta['features'][name] = set()
@@ -104,4 +105,8 @@ def get_meta(datasets):
     meta['node'] = list(meta['node'])
     for name in feature_names:
         meta['features'][name] = list(meta['features'][name])
+    meta['features_min'] = {feature: min(meta['features'][feature]) for feature in meta['features']}
+    for feature in meta['features']:
+        norm_values = [i - meta['features_min'][feature] for i in meta['features'][feature]]
+        meta['features'][feature] = norm_values
     return meta

@@ -17,7 +17,7 @@ def filter_dataset(dataset, max_len, max_reactants):
         r_mask = dataset[idx]['reactants']['mask']
         r_mask = r_mask[r_mask > 0]
         p_mask = dataset[idx]['reactants']['mask']
-        r_mask = r_mask[r_mask > 0]
+        p_mask = p_mask[p_mask > 0]
         length = len(dataset[idx]['reactants']['lengths']) - 1
         if (len(dataset[idx]['target_main_product']) <= max_len and
             len(r_mask) == len(np.unique(r_mask)) and

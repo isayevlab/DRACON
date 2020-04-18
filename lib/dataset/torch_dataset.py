@@ -43,17 +43,20 @@ class Dataset(data.Dataset):
                       self.node2label, pad_length=self.pad_length,
                       device=self.device, feature_idxs=self.feature_idxs,
                       n_molecule_level=self.n_molecule_level, n_reaction_level=self.n_reaction_level)
-        target_main_product = self.dataset[self.list_idxs[index]]['target_main_product']
-        target_main_product = np.pad(target_main_product, (0, self.pad_length - len(target_main_product)),
-                                     constant_values=-1)
-        target_center = self.dataset[self.list_idxs[index]]['target_center']
-        target_center = np.pad(target_center, (0, self.pad_length - len(target_center)), constant_values=-1)
-
-        target_main_product = torch.from_numpy(target_main_product).to(self.device).float()
-        target_center = torch.from_numpy(target_center).to(self.device).float()
+        if self.targets[0]:
+            target_main_product = self.dataset[self.list_idxs[index]]['target_main_product']
+            target_main_product = np.pad(target_main_product, (0, self.pad_length - len(target_main_product)),
+                                         constant_values=-1)
+            target_main_product = torch.from_numpy(target_main_product).to(self.device).float()
+        if self.targets[1]:
+            target_center = self.dataset[self.list_idxs[index]]['target_center']
+            target_center = np.pad(target_center, (0, self.pad_length - len(target_center)), constant_values=-1)
+            target_center = torch.from_numpy(target_center).to(self.device).float()
         if self.targets[0] and self.targets[1]:
             return g, target_main_product, target_center
         elif self.targets[0]:
             return g, target_main_product
-        else:
+        elif self.targets[1]:
             return g, target_center
+        else:
+            return g

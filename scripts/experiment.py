@@ -29,7 +29,7 @@ def main(config, device):
     if data_cfg.same_bond:
         bond2label = {i: 0 if i in meta['type'] else bond2label[i] for i in bond2label}
     num_rels = len(bond2label)
-    pad_length = data_cfg.max_num_atoms + 15 * data_cfg.n_molecule_level + \
+    pad_length = data_cfg.max_num_atoms + data_cfg.max_num_reactants * data_cfg.n_molecule_level + \
                  data_cfg.n_molecule_level * data_cfg.n_reaction_level
     num_nodes = pad_length
 

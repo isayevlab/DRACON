@@ -1,59 +1,42 @@
-import tensorflow as tf
-import re
+import init_path
 
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http import HttpResponse
-from rdkit import Chem
+from django.contrib.staticfiles.finders import find
+from django.templatetags.static import static
+from django.contrib.staticfiles.views import serve
 
-from reaction_predictors.t2t_models.t2t_utils import get_predictions
-from utils.smiles_utils import get_reaction, parse_smile
-
-
-data_dir = '/home/phillnik/Science/t2t/aug_data2x'
-model_name = "transformer"
-hparams_set = "transformer_base"
-ckpt_path = tf.train.latest_checkpoint('/data/phillnik/out_aug')
-problem_name = "aug_smiles"
-predict_target = get_predictions(problem_name, data_dir, ckpt_path, hparams_set, model_name)
+from pages.infer_script import infer
 
 
-def home(request):
-    context = {
-        'source_smiles': "",
-        'target_smiles': "",
-        'reaction': "",
-        'mol_file': ""
-    }
-    return render(request, 'index.html', context)
-
-
-class HomePageView(TemplateView):
+class MenuPageView(TemplateView):
     def get(self, request, **kwargs):
+        return render(request, 'menu.html')
+
+
+class TSNEPageView(TemplateView):
+    def get(self, request, **kwargs):
+        return serve(request, static('tsne.html'))
+
+
+class DemoPageView(TemplateView):
+    def get(self, request, **kwargs):
+        svg = static('imgs/uspto_50k/9_r.svg')
         context = {
-            'source_smiles': "",
-            'target_smiles': "",
-            'reaction': "",
-            'mol_file': ""
+            'result': svg,
         }
-        return render(request, 'index.html', context)
+        return render(request, 'demo.html', context)
 
     def post(self, request, **kwargs):
-        target_smiles = None
-        if 'src_smi' in request.POST:
-            # import pdb
-            # pdb.set_trace()
-            source_smiles = parse_smile(request.POST["src_smi"])
-            target_smiles = predict_target(source_smiles)
-            print('Source smiles: {}'.format(source_smiles))
-            print('Target smiles: {}'.format(target_smiles))
-            mol = Chem.MolToMolBlock(Chem.MolFromSmiles(target_smiles))
-            reaction = get_reaction(source_smiles, target_smiles)
+        if 'smi' in request.POST:
+            smiles = request.POST['smi']
+            print(f'**{smiles}**')
+            svg = infer(smiles, 'cpu')
+            with open('static/imgs/result.svg', 'w') as f:
+                f.write(svg)
+            svg = static('imgs/result.svg')
             context = {
-                'source_smiles': request.POST["src_smi"],
-                'target_smiles': target_smiles.replace(" ", ""),
-                'reaction': reaction,
-                'mol_file': '\n' + mol
+                'result': svg,
             }
-            return render(request, 'index.html', context)
-        return HttpResponse("Alert")
+        return render(request, 'demo.html', context)

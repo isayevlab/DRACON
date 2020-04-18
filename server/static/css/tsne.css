@@ -1,0 +1,126 @@
+body {
+    background-image: url("../imgs/back.jpg");
+    background-size: 100%;
+    color: #EFEFEF;
+
+    overflow: hidden;
+    font-family:verdana;
+    margin: 0;
+
+    --main-bg-color: #202020;
+    --main-elem-color: #E83D74;
+    --main-text-color: #EFEFEF;
+}
+
+.header {
+	float: left;
+	height: 25px;
+	width: 100%;
+	text-align: left;
+    background-color: var(--main-bg-color);
+    padding: 5px;
+    margin-bottom: 10px;
+
+}
+
+
+.name {
+  text-align: center;
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+  font-size: 25px;
+  vertical-align: middle;
+  line-height: 25px;
+  margin-bottom: 5px;
+}
+
+
+
+.column {
+      float: left;
+      width: 50%;
+      text-align: center;
+}
+
+.row {
+    text-align: center;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
+.column {
+  float: left;
+  width: 50%;
+  text-align: center;
+}
+
+
+iframe{
+	margin: 10px;
+	width: 95%;
+    height: 600px;
+    position: relative;
+}
+
+.wrapper {
+    text-align: center;
+}
+
+
+.description{
+	position: relative;
+	left: 5%;
+    width: 90%;
+    background-color: white;
+    border-radius: 15px;
+    text-align: center;
+    color: black;
+}
+
+
+.footer{
+    position: absolute;
+    height: 25px;
+    padding: 5px;
+	width: 100%;
+	bottom: 0;
+	left:0;
+	background-color: var(--main-bg-color);
+    display: flex;
+}
+
+.authors{
+    width: 80%;
+    height: 25px;
+    font-size: 15px;
+    text-align: left;
+    color: #ffffff;
+    position: relative;
+    vertical-align: middle;
+    line-height: 25px;
+}
+
+.github{
+    width: 20%;
+    height: 25px;
+    font-size: 15px;
+    text-align: left;
+    color: #ffffff;
+    position: relative;
+    vertical-align: middle;
+    line-height: 25px;
+
+}
+
+
+.github > a {
+    text-decoration: none;
+    color: white;
+
+}

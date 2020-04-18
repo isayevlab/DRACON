@@ -1,0 +1,40 @@
+<html>
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{% static "css/menu.css" %}" >
+    <title>Graph Neural Network for Atom Mapping in Chemical Reaction</title>
+
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="name">   Graph Neural Network for Atom Mapping in Chemical Reaction </div>
+    </div>
+
+
+    <div class="column">
+        <embed type="image/svg+xml" src="{% static "imgs/uspto_50k/9_r.svg" %}" class="img"/>
+        <div class="wrapper">
+            <a href="demo" class="button"> Demo </a>
+        </div>
+    </div>
+
+    <div class="column">
+
+        <img src="{% static "imgs/tsne_main.png" %}"  alt="Interactive TSNE" class="img">
+
+        <div class="wrapper">
+            <a class="button" href="{% static "tsne.html" %}"> Space of Reactions </a>
+        </div>
+    </div>
+
+    <div class="footer">
+                <div class="authors" >  <i> Filipp Nikitin, Olexandr Isyaev, Vadim Strijov, 2020 </i></div>
+                <div class="github"> <a href="#">GitHub</a> </div>
+    </div>
+
+</body>
+</html>

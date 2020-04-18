@@ -1,0 +1,212 @@
+body {
+    background-image: url("../imgs/back.jpg");
+    background-size: 100%;
+    color: #EFEFEF;
+
+    overflow: hidden;
+    font-family:verdana;
+    margin: 0;
+
+    --main-bg-color: #202020;
+    --main-elem-color: #E83D74;
+    --main-text-color: #EFEFEF;
+}
+
+.header {
+	float: left;
+	height: 25px;
+	width: 100%;
+	text-align: left;
+    background-color: var(--main-bg-color);
+    padding: 10px;
+    margin-bottom: 10px;
+
+}
+
+
+.name {
+  text-align: center;
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+  font-size: 25px;
+  vertical-align: middle;
+  line-height: 25px;
+}
+
+.search_warp{
+    left: 15%;
+    width: 70%;
+    position: relative;
+    z-index: 2;
+}
+
+.search {
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+
+.search_term {
+  width: 100%;
+  border: 3px solid #00B4CC;
+  border-right: none;
+  padding: 5px;
+  height: 36px;
+  border-radius: 5px 0 0 5px;
+  outline: none;
+  color: #9DBFAF;
+}
+
+.search_term:focus{
+  color: #00B4CC;
+}
+
+.search_button {
+  width: 300px;
+  height: 36px;
+  border: 1px solid #00B4CC;
+  background: #00B4CC;
+  text-align: center;
+  color: #fff;
+  border-radius: 0 5px 5px 0;
+  position: relative;
+  cursor: pointer;
+  font-size: 25px;
+  vertical-align: middle;
+  line-height: 36px;
+}
+
+.search_button:hover {
+    background-color: #efedeb;
+}
+
+
+.tooltip {
+      position: relative;
+      width: 150px;
+      height: 36px;
+      background: #00B4CC;
+      text-align: center;
+      color: #fff;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 25px;
+      vertical-align: middle;
+      line-height: 36px;
+}
+
+.tooltip_text {
+  visibility: hidden;
+  width: 540px;
+  height: 500px;
+  background-color: transparent;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  right:10%;
+  position: absolute;
+}
+
+.tooltip:hover .tooltip_text{
+  visibility: visible;
+    opacity: 1;
+  background-color: #c0c0c0;
+  border: 2px solid #69e
+}
+
+.button {
+	background-color: #00B4CC;
+	height: 25px;
+	width: 60%;
+    margin: 5px;
+	border: 2px solid #00B4CC;
+	border-radius: 12px;
+    padding: 5px;
+	font-size: 20px;
+	color: #000000;
+	cursor: pointer;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    transition-duration: 0.4s;
+    text-decoration: none;
+    vertical-align: top;
+    line-height: 10px;
+
+}
+
+.button:hover {
+    background-color: #efedeb;
+}
+
+
+.result_title{
+	left: 30%;
+    width: 40%;
+    border: 1px solid #efedeb;
+    background: #efedeb;
+    text-align: center;
+    color: #000000;
+    border-radius: 5px;
+    position: relative;
+    cursor: pointer;
+    font-size: 25px;
+    vertical-align: middle;
+    line-height: 36px;
+    padding: 5px;
+    z-index: 1;
+    margin-bottom: 20px;
+}
+
+
+embed{
+	height: 70%;
+	width: 90%;
+	position: relative;
+	left: 5%;
+}
+
+
+
+.footer{
+    position: absolute;
+    height: 25px;
+    padding: 5px;
+	width: 100%;
+	bottom: 0;
+	left:0;
+	background-color: var(--main-bg-color);
+    display: flex;
+}
+
+.authors{
+    width: 80%;
+    height: 25px;
+    font-size: 15px;
+    text-align: left;
+    color: #ffffff;
+    position: relative;
+    vertical-align: middle;
+    line-height: 25px;
+}
+
+.github{
+    width: 20%;
+    height: 25px;
+    font-size: 15px;
+    text-align: left;
+    color: #ffffff;
+    position: relative;
+    vertical-align: middle;
+    line-height: 25px;
+
+}
+
+
+.github > a {
+    text-decoration: none;
+    color: white;
+
+}

@@ -1,0 +1,62 @@
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static "css/demo.css" %}">
+    <script type="text/javascript" language="javascript" src="static/jsme/jsme.nocache.js"></script>
+
+    <script language="JavaScript">
+
+        function getSmiles() {
+          var drawing = document.JME.smiles();
+          document.form.smi.value = drawing;
+        }
+
+    </script>
+
+</head>
+
+
+
+
+
+<body>
+
+    <div class="header">
+        <div class="name">   Graph Neural Network for Atom Mapping in Chemical Reaction </div>
+    </div>
+
+
+    <div class="search_warp">
+        <form method="POST" name="form">
+            {% csrf_token %}
+            <div class="search">
+                <input type="text" name="smi" value="{{smiles}}" class="search_term" placeholder="Enter SMILES of reagents or draw them.">
+
+                <div class="tooltip"> Draw
+                    <span class="tooltip_text">
+                        <div>
+                            <div code="JME.class" name="JME" archive="JME.jar" width=540 height=475></div>
+                            <input type="button" value="Get SMILES" onClick="getSmiles()" class="button">
+                        </div>
+                    </span>
+                </div>
+
+                <input type="submit" value="Label Atoms" class="search_button">
+            </div>
+        </form>
+    </div>
+
+    <div class="result_title">
+        Result of the Model
+    </div>
+
+    <embed type="image/svg+xml" src={{result}} class="img"/>
+
+
+
+    <div class="footer">
+                <div class="authors" >  <i> Filipp Nikitin, Olexandr Isyaev, Vadim Strijov, 2020 </i></div>
+                <div class="github"> <a href="#">GitHub</a> </div>
+    </div>
+</body>
+</html>

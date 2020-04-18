@@ -1,0 +1,140 @@
+body {
+    background-image: url("../imgs/back.jpg");
+    background-size: 100%;
+    color: #EFEFEF;
+
+    overflow: hidden;
+    font-family:verdana;
+    margin: 0;
+
+    --main-bg-color: #202020;
+    --main-elem-color: #E83D74;
+    --main-text-color: #EFEFEF;
+}
+
+.header {
+	float: left;
+	height: 25px;
+	width: 100%;
+	text-align: left;
+    background-color: var(--main-bg-color);
+    padding: 5px;
+    margin-bottom: 10px;
+
+}
+
+
+.name {
+  text-align: center;
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+  font-size: 25px;
+  vertical-align: middle;
+  line-height: 25px;
+  margin-bottom: 5px;
+}
+
+
+
+.column {
+	  position: relative;
+      float: left;
+      width: 50%;
+      text-align: center;
+}
+
+
+.row:after {
+  display: table;
+  clear: both;
+}
+
+.img {
+	width: 95%;
+    height: 75%;
+    padding: 1%;
+}
+
+
+.wrapper {
+	position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+.wrapper {
+	height: 30px;
+	position: relative;
+    text-align: center;
+    width: 70%;
+    left: 15%;
+}
+
+
+.button {
+	height: 30px;
+	background-color: #00B4CC;
+	width: 70%;
+    margin: 5px;
+	border: 2px solid #00B4CC;
+	border-radius: 12px;
+    padding: 5px;
+	font-size: 25px;
+	color: #000000;
+	cursor: pointer;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    transition-duration: 0.4s;
+    text-decoration: none;
+    vertical-align: top;
+    line-height: 30px;
+}
+
+.button:hover {
+    background-color: #efedeb;
+}
+
+
+.footer{
+    position: absolute;
+    height: 25px;
+    padding: 5px;
+	width: 100%;
+	bottom: 0;
+	left:0;
+	background-color: var(--main-bg-color);
+    display: flex;
+}
+
+.authors{
+    width: 80%;
+    height: 25px;
+    font-size: 15px;
+    text-align: left;
+    color: #ffffff;
+    position: relative;
+    vertical-align: middle;
+    line-height: 25px;
+}
+
+.github{
+    width: 20%;
+    height: 25px;
+    font-size: 15px;
+    text-align: left;
+    color: #ffffff;
+    position: relative;
+    vertical-align: middle;
+    line-height: 25px;
+
+}
+
+
+.github > a {
+    text-decoration: none;
+    color: white;
+
+}
+

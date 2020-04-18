@@ -24,7 +24,7 @@ SECRET_KEY = 'qz%_ir)1khas+&5kdxs)09ie&=rg^87u$*g%$c&t_h7@oed)db'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "93.175.29.132"]
+ALLOWED_HOSTS = ["127.0.0.1", "93.175.29.159"]
 
 
 # Application definition
@@ -39,13 +39,12 @@ INSTALLED_APPS = [
     'pages',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -113,10 +112,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-# STATIC_ROOT = 'pages/templates/static/'
-# STATIC_URL = 'static/'
-
-STATIC_ROOT = '../pages/static/'
+STATIC_ROOT = '_static/'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [

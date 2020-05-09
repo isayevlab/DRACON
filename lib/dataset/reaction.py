@@ -4,12 +4,12 @@ from lib.dataset.molecule import Molecule
 
 
 class Reaction:
-    def __init__(self, smarts):
+    def __init__(self, smarts, drop_hs=True):
         reactants, agents, product = smarts.split('>')
         if agents != '':
             reactants = reactants + '.' + agents
-        self.reactants = Molecule(reactants)
-        self.product = Molecule(product)
+        self.reactants = Molecule(reactants, drop_hs=drop_hs)
+        self.product = Molecule(product, drop_hs=drop_hs)
 
     def get_product_mask(self):
         return np.int32(self.reactants.get_atoms_mapping() > 0)

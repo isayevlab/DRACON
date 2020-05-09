@@ -16,13 +16,13 @@ dataset:
   target_main_product: True
 
 model:
-  n_hidden: 64
+  n_hidden: 12
   num_conv_layers: 4
   num_fcn_layers: 2
   num_trans_layers: 2
   num_attention_heads: 2
   num_model_heads: 2
-  feature_embed_size: 8
+  feature_embed_size: 12
 
 
 train:

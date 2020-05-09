@@ -15,8 +15,16 @@ def matrices2mol(node_labels, edge_labels):
 
 
 class Molecule:
-    def __init__(self, smarts):
-        self.rdkit_molecule = Chem.MolFromSmiles(smarts)
+    def __init__(self, smarts, drop_hs=True):
+        mol = Chem.MolFromSmiles(smarts)
+        # print(smarts)
+        # for atom in mol.GetAtoms():
+        #     atom.SetNumExplicitHs(0)
+
+        if drop_hs:
+            self.rdkit_molecule = Chem.AddHs(mol, explicitOnly=True)
+        else:
+            self.rdkit_molecule = Chem.AddHs(mol, explicitOnly=True)
         self.rdkit_molecule.UpdatePropertyCache(strict=False)
 
     def get_senders_recievers_types(self):

@@ -4,16 +4,29 @@ body{
     background-color: aliceblue;
 }
 
-/*.bk-tooltip-custom{*/
-    /*width: 600px;*/
-    /*height: 330px;*/
-/*}*/
+.bk-tooltip-custom{
+    width: 400px;
+    height: auto;
+}
 
-/*embed{*/
-    /*width: 300px;*/
-    /*height: 300px;*/
-/*}*/
+embed{
+    width: 200px;
+    height: 200px;
+}
 
-/*.bk-root{*/
-    /*height: 100%;*/
-/*}*/
+
+.column {
+      float: left;
+      width: 50%;
+      text-align: center;
+}
+
+.row {
+    text-align: center;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}

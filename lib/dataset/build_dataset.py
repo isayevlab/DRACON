@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 from tqdm import tqdm
 from lib.dataset.reaction import Reaction
@@ -49,41 +50,44 @@ def get_center_target(rxn):
     return target
 
 
-def build_dataset(initial_dataset, atom_labels=True):
+def build_dataset(initial_dataset, atom_labels=True, drop_hs=True):
     columns = initial_dataset.columns
     dataset = {}
     for idx in tqdm(initial_dataset.index):
-        data = initial_dataset.loc[idx]
-        smarts = data['smarts'].split('|')[0]
-        product = {}
-        reactants = {}
-        rxn = Reaction(smarts)
-        lengths = get_molecule_lengths(rxn.reactants.get_smarts())
-        reactants['lengths'] = lengths
-        sender, reciever, types = rxn.reactants.get_senders_recievers_types()
-        reactants['sender'], reactants['reciever'], reactants['types'] = sender, reciever, types
-        nodes = rxn.reactants.get_node_types()
-        reactants['nodes'] = nodes
-        react_features = rxn.reactants.get_node_features()
-        reactants['features'] = react_features
-        reactants['mask'] = rxn.reactants.get_atoms_mapping()
+        try:
+            data = initial_dataset.loc[idx]
+            smarts = data['smarts'].split('|')[0]
+            product = {}
+            reactants = {}
+            rxn = Reaction(smarts, drop_hs=drop_hs)
+            lengths = get_molecule_lengths(rxn.reactants.get_smarts())
+            reactants['lengths'] = lengths
+            sender, reciever, types = rxn.reactants.get_senders_recievers_types()
+            reactants['sender'], reactants['reciever'], reactants['types'] = sender, reciever, types
+            nodes = rxn.reactants.get_node_types()
+            reactants['nodes'] = nodes
+            react_features = rxn.reactants.get_node_features()
+            reactants['features'] = react_features
+            reactants['mask'] = rxn.reactants.get_atoms_mapping()
 
-        sender, reciever, types = rxn.product.get_senders_recievers_types()
-        product['sender'], product['reciever'], product['types'] = sender, reciever, types
-        nodes = rxn.product.get_node_types()
-        product['nodes'] = nodes
-        prod_features = rxn.product.get_node_features()
-        product['features'] = prod_features
-        product['mask'] = rxn.product.get_atoms_mapping()
-        dataset[idx] = {'product': product,
-                        'reactants': reactants}
-        for name in columns:
-            dataset[idx][name] = data[name]
-        if atom_labels:
-            target_main_product = rxn.get_product_mask()
-            target_center = get_center_target(rxn)
-            dataset[idx]['target_main_product'] = target_main_product
-            dataset[idx]['target_center'] = target_center
+            sender, reciever, types = rxn.product.get_senders_recievers_types()
+            product['sender'], product['reciever'], product['types'] = sender, reciever, types
+            nodes = rxn.product.get_node_types()
+            product['nodes'] = nodes
+            prod_features = rxn.product.get_node_features()
+            product['features'] = prod_features
+            product['mask'] = rxn.product.get_atoms_mapping()
+            dataset[idx] = {'product': product,
+                            'reactants': reactants}
+            for name in columns:
+                dataset[idx][name] = data[name]
+            if atom_labels:
+                target_main_product = rxn.get_product_mask()
+                target_center = get_center_target(rxn)
+                dataset[idx]['target_main_product'] = target_main_product
+                dataset[idx]['target_center'] = target_center
+        except Exception:
+            print("Some error")
     return dataset
 
 

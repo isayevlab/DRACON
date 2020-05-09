@@ -1,5 +1,6 @@
 import init_path
 
+from rdkit import Chem
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http import HttpResponse
@@ -31,8 +32,11 @@ class DemoPageView(TemplateView):
     def post(self, request, **kwargs):
         if 'smi' in request.POST:
             smiles = request.POST['smi']
-            print(f'**{smiles}**')
-            svg = infer(smiles, 'cpu')
+            if Chem.MolFromSmiles(smiles) is None or smiles == '':
+                with open('static/imgs/error.svg', 'r') as f:
+                    svg = f.read()
+            else:
+                svg = infer(smiles, 'cpu')
             with open('static/imgs/result.svg', 'w') as f:
                 f.write(svg)
             svg = static('imgs/result.svg')

@@ -11,6 +11,16 @@ def get_molecule_lengths(smarts):
     return np.cumsum([0] + lengths)
 
 
+def prune_dataset(dataset, max_len, max_reactants):
+    new_dataset = {}
+    for idx in dataset:
+        length = len(dataset[idx]['reactants']['lengths']) - 1
+        if (len(dataset[idx]['reactants']['nodes']) <= max_len and
+            length <= max_reactants):
+            new_dataset[idx] = dataset[idx]
+    return new_dataset
+
+
 def filter_dataset(dataset, max_len, max_reactants):
     new_dataset = {}
     for idx in dataset:
@@ -22,6 +32,6 @@ def filter_dataset(dataset, max_len, max_reactants):
         if (len(dataset[idx]['target_main_product']) <= max_len and
             len(r_mask) == len(np.unique(r_mask)) and
             len(p_mask) == len(np.unique(p_mask)) and
-            length < max_reactants):
+            length <= max_reactants):
             new_dataset[idx] = dataset[idx]
     return new_dataset

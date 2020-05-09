@@ -2,15 +2,19 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static "css/demo.css" %}">
-    <script type="text/javascript" language="javascript" src="static/jsme/jsme.nocache.js"></script>
+    <script type="text/javascript" language="javascript" src="{% static "jsme/jsme.nocache.js" %}"></script>
 
     <script language="JavaScript">
-
         function getSmiles() {
           var drawing = document.JME.smiles();
           document.form.smi.value = drawing;
         }
-
+        function getDrawing() {
+          var drawing = document.JME.smiles();
+          if (document.form.smi.value == '') {
+              document.form.smi.value = drawing;
+          }
+        }
     </script>
 
 </head>
@@ -41,7 +45,7 @@
                     </span>
                 </div>
 
-                <input type="submit" value="Label Atoms" class="search_button">
+                <input type="submit" value="Label Atoms" class="search_button" onClick="getDrawing()">
             </div>
         </form>
     </div>

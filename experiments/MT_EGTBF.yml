@@ -10,24 +10,24 @@ dataset:
   max_num_reactants: 15
   self_bond: True
   same_bond: False
-  feature_idxs:  [0, 1 , 2, 3, 4, 5, 6, 7, 8, 9]
-  feature_sizes: [9, 16, 8, 6, 3, 8, 6, 3, 12, 13]
+  feature_idxs:  [0, 2, 4, 7, 8, 9]
+  feature_sizes: [9, 8, 3, 3, 12, 13]
   target_center: True
   target_main_product: True
 
 model:
-  n_hidden: 16
+  n_hidden: 64
   num_conv_layers: 4
   num_fcn_layers: 2
   num_trans_layers: 2
   num_attention_heads: 2
   num_model_heads: 2
-  feature_embed_size: 16
+  feature_embed_size: 8
 
 
 train:
-  batch_size: 64
+  batch_size: 128
   lr: 0.001
-  n_epoches: 25
+  n_epoches: 6
   exp_step_size: 10000
   eval_names: ['Main product mapping', 'Center of reaction']
